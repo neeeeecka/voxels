@@ -34,6 +34,10 @@ public static class CubeMeshData
         }
         return fv;
     }
+    public static Vector3[] faceVertices(Direction dir, Vector3 pos)
+    {
+        return faceVertices((int)dir, pos);
+    }
 }
 
 public class TerrainGenerator : MonoBehaviour
@@ -54,28 +58,32 @@ public class TerrainGenerator : MonoBehaviour
     {
         VoxelData data = new VoxelData();
         int w = data.Width();
-        int h = data.Height();
+        int d = data.Depth();
 
-        for (int y = 0; y < h; y++)
+        for (int x = 0; x < w; x++)
         {
-            for (int x = 0; x < w; x++)
+            for (int z = 0; z < d; z++)
             {
-                if (data.GetCell(x, y) == 1)
+                if (data.GetCell(x, 0, z) == 1)
                 {
-                    MakeCube(new Vector3(x, y, 0));
+                    MakeCube(new Vector3(x, 0, z), data);
                 }
             }
         }
+
     }
 
-    void MakeCube(Vector3 pos)
+    void MakeCube(Vector3 pos, VoxelData data)
     {
         for (int i = 0; i < 6; i++)
         {
-            MakeFace(i, pos);
+            if (data.GetNeighbor((int)pos.x, (int)pos.y, (int)pos.z, (Direction)i) == 0)
+            {
+                MakeFace((Direction)i, pos);
+            }
         }
     }
-    void MakeFace(int dir, Vector3 pos)
+    void MakeFace(Direction dir, Vector3 pos)
     {
         vertices.AddRange(CubeMeshData.faceVertices(dir, pos));
         int zero = vertices.Count - 4;
