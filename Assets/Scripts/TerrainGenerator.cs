@@ -57,7 +57,23 @@ public class TerrainGenerator : MonoBehaviour
 
     void MakeWorld()
     {
-        VoxelData data = new VoxelData();
+        int depth = 10, width = 15, height = 10;
+
+        Noise.Seed = 209323094; // Optional
+        float scale = 0.10f;
+        float[,] noiseValues = Noise.Calc2D(depth, width, scale);
+
+        VoxelData data = new VoxelData(width, height, depth);
+
+
+        // for (int x = 0; x < width; x++)
+        // {
+        //     for (int z = 0; z < depth; z++)
+        //     {
+        //         int yVal = (int)Mathf.Clamp(noiseValues[z, x] / 10, 0, height - 1);
+        //         data.SetCell(x, yVal, z, 1);
+        //     }
+        // }
 
         int w = data.Width();
         int d = data.Depth();
@@ -77,7 +93,6 @@ public class TerrainGenerator : MonoBehaviour
                 }
             }
         }
-
 
     }
 

@@ -16,6 +16,11 @@ public class VoxelData
         {{ 1, 0, 1 }, { 1, 1, 1 }, { 1, 1, 1 }}
     };
 
+    public VoxelData(int x, int y, int z)
+    {
+        // this.data = new int[x, y, z];
+    }
+
     public int Width()
     {
         return data.GetLength(0);
@@ -33,6 +38,10 @@ public class VoxelData
         return data[x, y, z];
     }
 
+    public void SetCell(int x, int y, int z, int val)
+    {
+        data[x, y, z] = val;
+    }
     public int GetNeighbor(int x, int y, int z, Direction dir)
     {
         DataCoordinate checkOffset = offsets[(int)dir];
