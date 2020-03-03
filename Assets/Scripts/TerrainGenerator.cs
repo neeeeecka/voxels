@@ -42,7 +42,12 @@ public static class CubeMeshData
 
 public class TerrainGenerator : MonoBehaviour
 {
+    private int lastSeed = 0;
+    private int lastDivisor = 0;
     public int seed = 209323094;
+    [Range(1, 200)]
+    public int divisor = 98;
+
     List<Vector3> vertices = new List<Vector3>();
     List<int> triangles = new List<int>();
     Mesh mesh;
@@ -51,29 +56,42 @@ public class TerrainGenerator : MonoBehaviour
     {
         mesh = new Mesh();
         GetComponent<MeshFilter>().mesh = mesh;
+        mesh.MarkDynamic();
         MakeWorld();
-        UpdateMesh();
+    }
+
+    private void Update()
+    {
+        if (lastDivisor != divisor || lastSeed != seed)
+        {
+            lastDivisor = divisor;
+            lastSeed = seed;
+            MakeWorld();
+        }
     }
 
     void MakeWorld()
     {
-        int depth = 10, width = 15, height = 10;
+        vertices.Clear();
+        triangles.Clear();
 
-        Noise.Seed = 209323094; // Optional
+        int depth = 70, width = 70, height = 10;
+
+        Noise.Seed = seed; // Optional
         float scale = 0.10f;
         float[,] noiseValues = Noise.Calc2D(depth, width, scale);
 
         VoxelData data = new VoxelData(width, height, depth);
 
 
-        // for (int x = 0; x < width; x++)
-        // {
-        //     for (int z = 0; z < depth; z++)
-        //     {
-        //         int yVal = (int)Mathf.Clamp(noiseValues[z, x] / 10, 0, height - 1);
-        //         data.SetCell(x, yVal, z, 1);
-        //     }
-        // }
+        for (int x = 0; x < width; x++)
+        {
+            for (int z = 0; z < depth; z++)
+            {
+                int yVal = (int)Mathf.Clamp(noiseValues[z, x] / divisor, 0, 7);
+                data.SetCell(x, yVal, z, 1);
+            }
+        }
 
         int w = data.Width();
         int d = data.Depth();
@@ -93,6 +111,7 @@ public class TerrainGenerator : MonoBehaviour
                 }
             }
         }
+        UpdateMesh();
 
     }
 
@@ -121,6 +140,7 @@ public class TerrainGenerator : MonoBehaviour
 
     void UpdateMesh()
     {
+        mesh.Clear();
         mesh.vertices = vertices.ToArray();
         mesh.triangles = triangles.ToArray();
         mesh.RecalculateNormals();

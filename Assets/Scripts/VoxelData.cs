@@ -11,14 +11,17 @@ public class VoxelData
     // };
 
     int[,,] data = new int[,,] {
-        {{ 0, 1, 1 }, { 1, 1, 1 }, { 1, 0, 1 }},
-        {{ 0, 1, 1 }, { 1, 1, 0 }, { 1, 0, 1 }},
-        {{ 1, 0, 1 }, { 1, 1, 1 }, { 1, 1, 1 }}
+        {{ 1, 1, 1, 1, 1, 1 }},
+        {{ 1, 1, 0, 0, 1, 1 }},
+        {{ 1, 1, 0, 0, 1, 1 }},
+        {{ 1, 1, 1, 1, 1, 1 }},
+        {{ 1, 1, 1, 1, 1, 1 }}
+
     };
 
     public VoxelData(int x, int y, int z)
     {
-        // this.data = new int[x, y, z];
+        this.data = new int[x, y, z];
     }
 
     public int Width()
