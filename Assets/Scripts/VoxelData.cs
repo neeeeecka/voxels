@@ -4,22 +4,33 @@ using UnityEngine;
 
 public class VoxelData
 {
-    int[,] data = new int[,] {
-        { 1, 1, 1 },
-        { 1, 0, 0 },
-        { 0, 0, 0 }
+    // int[,] data = new int[,] {
+    //     { 1, 1, 1 },
+    //     { 1, 0, 1 },
+    //     { 1, 1, 1 }
+    // };
+
+    int[,,] data = new int[,,] {
+        {{ 0, 1, 1 }, { 1, 1, 1 }, { 1, 0, 1 }},
+        {{ 0, 1, 1 }, { 1, 1, 0 }, { 1, 0, 1 }},
+        {{ 1, 0, 1 }, { 1, 1, 1 }, { 1, 1, 1 }}
     };
+
     public int Width()
     {
         return data.GetLength(0);
     }
-    public int Depth()
+    public int Height()
     {
         return data.GetLength(1);
     }
+    public int Depth()
+    {
+        return data.GetLength(2);
+    }
     public int GetCell(int x, int y, int z)
     {
-        return data[x, z];
+        return data[x, y, z];
     }
 
     public int GetNeighbor(int x, int y, int z, Direction dir)
@@ -35,7 +46,11 @@ public class VoxelData
         {
             return 0;
         }
-        // if (neighborCoordinate.y < 0 || neighborCoordinate.y >= Height())
+        if (neighborCoordinate.y < 0 || neighborCoordinate.y >= Height())
+        {
+            return 0;
+        }
+        // if (neighborCoordinate.y != 0)
         // {
         //     return 0;
         // }

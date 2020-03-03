@@ -16,13 +16,13 @@ public static class CubeMeshData
         new Vector3(-1,-1,-1),
     };
 
-    public static int[][] faceTriangles = {
-        new int[]{0,1,2,3},
-        new int[]{5,0,3,6},
-        new int[]{4,5,6,7},
-        new int[]{1,4,7,2},
-        new int[]{5,4,1,0},
-        new int[]{3,2,7,6}
+    public static int[][] faces = {
+        new int[]{0,1,2,3}, //North face
+        new int[]{5,0,3,6}, //East
+        new int[]{4,5,6,7}, //South
+        new int[]{1,4,7,2}, //West
+        new int[]{5,4,1,0}, //Up
+        new int[]{3,2,7,6} //Down
     };
 
     public static Vector3[] faceVertices(int dir, Vector3 pos)
@@ -30,7 +30,7 @@ public static class CubeMeshData
         Vector3[] fv = new Vector3[4];
         for (int i = 0; i < 4; i++)
         {
-            fv[i] = (vertices[faceTriangles[dir][i]]) * 0.5f + pos;
+            fv[i] = (vertices[faces[dir][i]]) * 0.5f + pos;
         }
         return fv;
     }
@@ -42,6 +42,7 @@ public static class CubeMeshData
 
 public class TerrainGenerator : MonoBehaviour
 {
+    public int seed = 209323094;
     List<Vector3> vertices = new List<Vector3>();
     List<int> triangles = new List<int>();
     Mesh mesh;
@@ -57,19 +58,26 @@ public class TerrainGenerator : MonoBehaviour
     void MakeWorld()
     {
         VoxelData data = new VoxelData();
+
         int w = data.Width();
         int d = data.Depth();
+        int h = data.Height();
 
-        for (int x = 0; x < w; x++)
+
+        for (int y = 0; y < h; y++)
         {
-            for (int z = 0; z < d; z++)
+            for (int x = 0; x < w; x++)
             {
-                if (data.GetCell(x, 0, z) == 1)
+                for (int z = 0; z < d; z++)
                 {
-                    MakeCube(new Vector3(x, 0, z), data);
+                    if (data.GetCell(x, y, z) == 1)
+                    {
+                        MakeCube(new Vector3(x, y, z), data);
+                    }
                 }
             }
         }
+
 
     }
 
