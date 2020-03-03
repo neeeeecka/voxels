@@ -30,7 +30,7 @@ public static class CubeMeshData
         Vector3[] fv = new Vector3[4];
         for (int i = 0; i < 4; i++)
         {
-            fv[i] = (vertices[faceTriangles[dir][i]] + pos) * 0.5f;
+            fv[i] = (vertices[faceTriangles[dir][i]]) * 0.5f + pos;
         }
         return fv;
     }
@@ -54,10 +54,11 @@ public class TerrainGenerator : MonoBehaviour
     {
         VoxelData data = new VoxelData();
         int w = data.Width();
-        int d = data.Depth();
-        for (int x = 0; x < w; x++)
+        int h = data.Height();
+
+        for (int y = 0; y < h; y++)
         {
-            for (int y = 0; y < d; y++)
+            for (int x = 0; x < w; x++)
             {
                 if (data.GetCell(x, y) == 1)
                 {
