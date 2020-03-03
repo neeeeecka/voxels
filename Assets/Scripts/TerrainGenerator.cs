@@ -25,12 +25,12 @@ public static class CubeMeshData
         new int[]{3,2,7,6}
     };
 
-    public static Vector3[] faceVertices(int dir)
+    public static Vector3[] faceVertices(int dir, Vector3 pos)
     {
         Vector3[] fv = new Vector3[4];
         for (int i = 0; i < 4; i++)
         {
-            fv[i] = vertices[faceTriangles[dir][i]];
+            fv[i] = (vertices[faceTriangles[dir][i]] + pos) * 0.5f;
         }
         return fv;
     }
@@ -46,20 +46,37 @@ public class TerrainGenerator : MonoBehaviour
     {
         mesh = new Mesh();
         GetComponent<MeshFilter>().mesh = mesh;
-        MakeCube();
+        MakeWorld();
         UpdateMesh();
     }
 
-    void MakeCube()
+    void MakeWorld()
+    {
+        VoxelData data = new VoxelData();
+        int w = data.Width();
+        int d = data.Depth();
+        for (int x = 0; x < w; x++)
+        {
+            for (int y = 0; y < d; y++)
+            {
+                if (data.GetCell(x, y) == 1)
+                {
+                    MakeCube(new Vector3(x, y, 0));
+                }
+            }
+        }
+    }
+
+    void MakeCube(Vector3 pos)
     {
         for (int i = 0; i < 6; i++)
         {
-            MakeFace(i);
+            MakeFace(i, pos);
         }
     }
-    void MakeFace(int dir)
+    void MakeFace(int dir, Vector3 pos)
     {
-        vertices.AddRange(CubeMeshData.faceVertices(dir));
+        vertices.AddRange(CubeMeshData.faceVertices(dir, pos));
         int zero = vertices.Count - 4;
 
         triangles.Add(zero);
