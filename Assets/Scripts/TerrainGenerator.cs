@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using UnityEngine;
 
 
-
-
 public class TerrainGenerator : MonoBehaviour
 {
     private float lastSeed = 0;

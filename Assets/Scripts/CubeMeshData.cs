@@ -42,19 +42,19 @@ public static class CubeMeshData
 
         Vector2[] sideUV = new Vector2[4]{
             new Vector2(0, 1),
-            new Vector2(1f/3, 1),
-            new Vector2(1f/3, 0),
+            new Vector2(1f/4, 1),
+            new Vector2(1f/4, 0),
             new Vector2(0, 0)
         };
         Vector2[] topUV = new Vector2[4]{
-            new Vector2(1f/3, 0),
-            new Vector2(1f/3, 1),
-            new Vector2(2f/3, 1),
-            new Vector2(2f/3, 0)
+            new Vector2(1f/4, 0),
+            new Vector2(1f/4, 1),
+            new Vector2(2f/4, 1),
+            new Vector2(2f/4, 0)
         };
         Vector2[] bottomUV = new Vector2[4]{
-            new Vector2(2f/3, 0),
-            new Vector2(2f/3, 1),
+            new Vector2(2f/4, 0),
+            new Vector2(2f/4, 1),
             new Vector2(1, 1),
             new Vector2(1, 0)
         };
