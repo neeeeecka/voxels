@@ -140,7 +140,7 @@ MonoBehaviour:
     value: 0
   saturation:
     overrideState: 1
-    value: 36.03
+    value: 8.99
   brightness:
     overrideState: 0
     value: 0
@@ -149,7 +149,7 @@ MonoBehaviour:
     value: 0.72
   contrast:
     overrideState: 1
-    value: -1.39
+    value: -8.6
   mixerRedOutRedIn:
     overrideState: 0
     value: 100

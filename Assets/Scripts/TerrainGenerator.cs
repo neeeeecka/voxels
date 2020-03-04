@@ -94,14 +94,14 @@ public class TerrainGenerator : MonoBehaviour
         {
             if (data.GetNeighbor((int)pos.x, (int)pos.y, (int)pos.z, (Direction)i) == 0)
             {
-                MakeFace((Direction)i, pos);
+                MakeFace((Direction)i, pos, cubeType);
             }
         }
     }
-    void MakeFace(Direction dir, Vector3 pos)
+    void MakeFace(Direction dir, Vector3 pos, int cubeType)
     {
         vertices.AddRange(CubeMeshData.faceVertices(dir, pos));
-        uvs.AddRange(CubeMeshData.faceUVs(dir));
+        uvs.AddRange(CubeMeshData.faceUVs(dir, cubeType));
 
 
         int zero = vertices.Count - 4;

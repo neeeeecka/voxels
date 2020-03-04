@@ -37,7 +37,7 @@ public static class CubeMeshData
     {
         return faceVertices((int)dir, pos);
     }
-    public static Vector2[] faceUVs(Direction dir)
+    public static Vector2[] faceUVs(Direction dir, int cubeType)
     {
 
         Vector2[] sideUV = new Vector2[4]{
