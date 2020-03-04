@@ -3,42 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 
-public static class CubeMeshData
-{
-    public static Vector3[] vertices = {
-        new Vector3(1,1,1),
-        new Vector3(-1,1,1),
-        new Vector3(-1,-1,1),
-        new Vector3(1,-1,1),
-        new Vector3(-1,1,-1),
-        new Vector3(1,1,-1),
-        new Vector3(1,-1,-1),
-        new Vector3(-1,-1,-1),
-    };
 
-    public static int[][] faces = {
-        new int[]{0,1,2,3}, //North face
-        new int[]{5,0,3,6}, //East
-        new int[]{4,5,6,7}, //South
-        new int[]{1,4,7,2}, //West
-        new int[]{5,4,1,0}, //Up
-        new int[]{3,2,7,6} //Down
-    };
-
-    public static Vector3[] faceVertices(int dir, Vector3 pos)
-    {
-        Vector3[] fv = new Vector3[4];
-        for (int i = 0; i < 4; i++)
-        {
-            fv[i] = (vertices[faces[dir][i]]) * 0.5f + pos;
-        }
-        return fv;
-    }
-    public static Vector3[] faceVertices(Direction dir, Vector3 pos)
-    {
-        return faceVertices((int)dir, pos);
-    }
-}
 
 public class TerrainGenerator : MonoBehaviour
 {
@@ -50,6 +15,8 @@ public class TerrainGenerator : MonoBehaviour
 
     List<Vector3> vertices = new List<Vector3>();
     List<int> triangles = new List<int>();
+
+    List<Vector2> uvs = new List<Vector2>();
     Mesh mesh;
 
     void Start()
@@ -76,9 +43,10 @@ public class TerrainGenerator : MonoBehaviour
     void MakeWorld()
     {
         vertices.Clear();
+        uvs.Clear();
         triangles.Clear();
 
-        int depth = 70, width = 70, height = 10;
+        int depth = 1, width = 1, height = 1;
 
         Noise.Seed = (int)seed; // Optional
         float scale = 0.10f;
@@ -134,6 +102,9 @@ public class TerrainGenerator : MonoBehaviour
     void MakeFace(Direction dir, Vector3 pos)
     {
         vertices.AddRange(CubeMeshData.faceVertices(dir, pos));
+        uvs.AddRange(CubeMeshData.faceUVs(dir));
+
+
         int zero = vertices.Count - 4;
 
         triangles.Add(zero);
@@ -149,7 +120,7 @@ public class TerrainGenerator : MonoBehaviour
         mesh.Clear();
         mesh.vertices = vertices.ToArray();
         mesh.triangles = triangles.ToArray();
+        mesh.uv = uvs.ToArray();
         mesh.RecalculateNormals();
-
     }
 }
