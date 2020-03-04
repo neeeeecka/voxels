@@ -42,9 +42,9 @@ public static class CubeMeshData
 
 public class TerrainGenerator : MonoBehaviour
 {
-    private int lastSeed = 0;
+    private float lastSeed = 0;
     private int lastDivisor = 0;
-    public int seed = 209323094;
+    public float seed = 209323094;
     [Range(1, 200)]
     public int divisor = 98;
 
@@ -58,6 +58,8 @@ public class TerrainGenerator : MonoBehaviour
         GetComponent<MeshFilter>().mesh = mesh;
         mesh.MarkDynamic();
         MakeWorld();
+        GetComponent<MeshCollider>().sharedMesh = mesh;
+
     }
 
     private void Update()
@@ -68,6 +70,7 @@ public class TerrainGenerator : MonoBehaviour
             lastSeed = seed;
             MakeWorld();
         }
+        // seed += 0.1f;
     }
 
     void MakeWorld()
@@ -77,7 +80,7 @@ public class TerrainGenerator : MonoBehaviour
 
         int depth = 70, width = 70, height = 10;
 
-        Noise.Seed = seed; // Optional
+        Noise.Seed = (int)seed; // Optional
         float scale = 0.10f;
         float[,] noiseValues = Noise.Calc2D(depth, width, scale);
 
@@ -88,8 +91,12 @@ public class TerrainGenerator : MonoBehaviour
         {
             for (int z = 0; z < depth; z++)
             {
-                int yVal = (int)Mathf.Clamp(noiseValues[z, x] / divisor, 0, 7);
-                data.SetCell(x, yVal, z, 1);
+                int yVal = (int)Mathf.Clamp(noiseValues[z, x] / divisor, 0, 5);
+                // data.SetCell(x, yVal, z, 1);
+                for (int y = yVal; y > 0; y--)
+                {
+                    data.SetCell(x, y, z, 1);
+                }
             }
         }
 
@@ -112,7 +119,6 @@ public class TerrainGenerator : MonoBehaviour
             }
         }
         UpdateMesh();
-
     }
 
     void MakeCube(Vector3 pos, VoxelData data)
