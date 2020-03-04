@@ -12,13 +12,20 @@ public class TerrainGenerator : MonoBehaviour
     public int divisor = 98;
 
     List<Vector3> vertices = new List<Vector3>();
+    Dictionary<VertexSignature, int> verticesDict = new Dictionary<VertexSignature, int>();
+    int vertexCount = 0;
     List<int> triangles = new List<int>();
+    List<Vector3> normals = new List<Vector3>();
 
     List<Vector2> uvs = new List<Vector2>();
     Mesh mesh;
 
     void Start()
     {
+
+        lastSeed = seed;
+        lastDivisor = divisor;
+
         mesh = new Mesh();
         GetComponent<MeshFilter>().mesh = mesh;
         mesh.MarkDynamic();
@@ -40,11 +47,14 @@ public class TerrainGenerator : MonoBehaviour
 
     void MakeWorld()
     {
+        vertexCount = 0;
         vertices.Clear();
+        normals.Clear();
+        verticesDict.Clear();
         uvs.Clear();
         triangles.Clear();
 
-        int depth = 70, width = 70, height = 10;
+        int depth = 1, width = 1, height = 1;
 
         Noise.Seed = (int)seed; // Optional
         float scale = 0.10f;
@@ -94,15 +104,29 @@ public class TerrainGenerator : MonoBehaviour
         {
             if (data.GetNeighbor((int)pos.x, (int)pos.y, (int)pos.z, (Direction)i) == 0)
             {
-                MakeFace((Direction)i, pos, cubeType);
+                // MakeFace((Direction)i, pos, cubeType);
+                MakeFaceClean((Direction)i, pos, cubeType);
             }
         }
+    }
+    int GetVertexIndex(VertexSignature signature)
+    {
+        //return new vertex index, 
+        //if it doesn't exist we create new, 
+        //if it does exist return last index
+
+        int index;
+        if (!verticesDict.TryGetValue(signature, out index))
+        {
+            index = vertexCount++;
+            verticesDict.Add(signature, index);
+        }
+        return index;
     }
     void MakeFace(Direction dir, Vector3 pos, int cubeType)
     {
         vertices.AddRange(CubeMeshData.faceVertices(dir, pos));
         uvs.AddRange(CubeMeshData.faceUVs(dir, cubeType));
-
 
         int zero = vertices.Count - 4;
 
@@ -113,13 +137,83 @@ public class TerrainGenerator : MonoBehaviour
         triangles.Add(zero + 2);
         triangles.Add(zero + 3);
     }
+    void MakeFaceClean(Direction dir, Vector3 pos, int cubeType)
+    {
+
+        // vertices.AddRange(CubeMeshData.faceVertices(dir, pos));
+        VertexSignature signature;
+        signature.normal = dir;
+
+        Vector3[] faceVertices = CubeMeshData.faceVertices(dir, pos);
+        int[] triangleIndices = new int[4];
+
+        signature.position = faceVertices[0];
+
+
+        int a = GetVertexIndex(signature);
+
+        signature.position = faceVertices[1];
+
+
+        int b = GetVertexIndex(signature);
+
+        signature.position = faceVertices[2];
+
+
+        int c = GetVertexIndex(signature);
+
+        signature.position = faceVertices[3];
+
+
+        int d = GetVertexIndex(signature);
+
+        // uvs.AddRange(CubeMeshData.faceUVs(dir, cubeType));
+
+        int zero = verticesDict.Count - 4;
+
+        triangles.Add(a);
+        triangles.Add(b);
+        triangles.Add(c);
+
+        triangles.Add(a);
+        triangles.Add(c);
+        triangles.Add(d);
+    }
+
+    void SetFinalData()
+    {
+        foreach (var pair in verticesDict)
+        {
+            int index = pair.Value;
+            vertices.Add(pair.Key.position);
+            normals.Add(CubeMeshData.offsets[(int)pair.Key.normal].ToVector());
+
+            // Vector3 uv = ProjectPositionToUV(pair.key.position, pair.key.normal);
+            // Vector2 uv = CubeMeshData.GetVertexUV(pair.Key.normal);
+            // uvs[index] = uv;
+        }
+
+    }
 
     void UpdateMesh()
     {
         mesh.Clear();
+
+        SetFinalData();
+
+        // mesh.vertices = JustConvertDictionaryToVertices();
+
         mesh.vertices = vertices.ToArray();
         mesh.triangles = triangles.ToArray();
-        mesh.uv = uvs.ToArray();
-        mesh.RecalculateNormals();
+        mesh.normals = normals.ToArray();
+        // mesh.uv = uvs.ToArray();
+        // mesh.RecalculateNormals();
     }
+
+    struct VertexSignature
+    {
+        public Vector3 position;
+        public Direction normal;
+
+    };
 }

@@ -47,8 +47,8 @@ public class VoxelData
     }
     public int GetNeighbor(int x, int y, int z, Direction dir)
     {
-        DataCoordinate checkOffset = offsets[(int)dir];
-        DataCoordinate neighborCoordinate = new DataCoordinate(
+        CubeMeshData.DataCoordinate checkOffset = CubeMeshData.offsets[(int)dir];
+        CubeMeshData.DataCoordinate neighborCoordinate = new CubeMeshData.DataCoordinate(
             x + checkOffset.x,
             y + checkOffset.y,
             z + checkOffset.z
@@ -74,27 +74,7 @@ public class VoxelData
         return GetCell(neighborCoordinate.x, neighborCoordinate.y, neighborCoordinate.z);
     }
 
-    struct DataCoordinate
-    {
-        public int x;
-        public int y;
-        public int z;
 
-        public DataCoordinate(int x, int y, int z)
-        {
-            this.x = x;
-            this.y = y;
-            this.z = z;
-        }
-    }
-    DataCoordinate[] offsets = {
-        new DataCoordinate(0, 0, 1),
-        new DataCoordinate(1, 0, 0),
-        new DataCoordinate(0, 0, -1),
-        new DataCoordinate(-1, 0, 0),
-        new DataCoordinate(0, 1, 0),
-        new DataCoordinate(0, -1, 0),
-    };
 }
 
 public enum Direction

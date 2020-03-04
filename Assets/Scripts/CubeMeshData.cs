@@ -4,6 +4,32 @@ using UnityEngine;
 
 public static class CubeMeshData
 {
+    public struct DataCoordinate
+    {
+        public int x;
+        public int y;
+        public int z;
+
+        public DataCoordinate(int x, int y, int z)
+        {
+            this.x = x;
+            this.y = y;
+            this.z = z;
+        }
+
+        public Vector3 ToVector()
+        {
+            return new Vector3(this.x, this.y, this.z);
+        }
+    };
+    public static DataCoordinate[] offsets = {
+        new DataCoordinate(0, 0, 1),
+        new DataCoordinate(1, 0, 0),
+        new DataCoordinate(0, 0, -1),
+        new DataCoordinate(-1, 0, 0),
+        new DataCoordinate(0, 1, 0),
+        new DataCoordinate(0, -1, 0),
+    };
     public static Vector3[] vertices = {
         new Vector3(1,1,1),
         new Vector3(-1,1,1),
@@ -37,9 +63,15 @@ public static class CubeMeshData
     {
         return faceVertices((int)dir, pos);
     }
+
+    public static Vector2 GetVertexUV(Direction dir, Vector3 offset)
+    {
+        Debug.Log(offset * 2);
+        return new Vector2();
+    }
+
     public static Vector2[] faceUVs(Direction dir, int cubeType)
     {
-
         Vector2[] sideUV = new Vector2[4]{
             new Vector2(0, 1),
             new Vector2(1f/4, 1),
