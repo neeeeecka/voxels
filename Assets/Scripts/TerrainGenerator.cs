@@ -44,7 +44,7 @@ public class TerrainGenerator : MonoBehaviour
         uvs.Clear();
         triangles.Clear();
 
-        int depth = 1, width = 1, height = 1;
+        int depth = 70, width = 70, height = 10;
 
         Noise.Seed = (int)seed; // Optional
         float scale = 0.10f;
@@ -77,9 +77,10 @@ public class TerrainGenerator : MonoBehaviour
             {
                 for (int z = 0; z < d; z++)
                 {
-                    if (data.GetCell(x, y, z) == 1)
+                    int cubeType = data.GetCell(x, y, z);
+                    if (cubeType != 0)
                     {
-                        MakeCube(new Vector3(x, y, z), data);
+                        MakeCube(new Vector3(x, y, z), data, cubeType);
                     }
                 }
             }
@@ -87,7 +88,7 @@ public class TerrainGenerator : MonoBehaviour
         UpdateMesh();
     }
 
-    void MakeCube(Vector3 pos, VoxelData data)
+    void MakeCube(Vector3 pos, VoxelData data, int cubeType)
     {
         for (int i = 0; i < 6; i++)
         {
