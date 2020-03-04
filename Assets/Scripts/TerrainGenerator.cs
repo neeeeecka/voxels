@@ -91,9 +91,9 @@ public class TerrainGenerator : MonoBehaviour
         {
             for (int z = 0; z < depth; z++)
             {
-                int yVal = (int)Mathf.Clamp(noiseValues[z, x] / divisor, 0, 5);
+                int yVal = (int)Mathf.Clamp(noiseValues[z, x] / divisor, 0, height);
                 // data.SetCell(x, yVal, z, 1);
-                for (int y = yVal; y > 0; y--)
+                for (int y = yVal - 1; y >= 0; y--)
                 {
                     data.SetCell(x, y, z, 1);
                 }
