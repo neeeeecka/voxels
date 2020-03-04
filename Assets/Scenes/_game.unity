@@ -152,7 +152,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ec96a82ddbc45c9418ee4474e822ba90, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  seed: 209323094
+  seed: 2055000
   divisor: 37
 --- !u!4 &992339430
 Transform:
