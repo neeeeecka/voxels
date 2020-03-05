@@ -70,24 +70,26 @@ public static class CubeMeshData
 
     public static Vector2[] faceUVs(Direction dir, int cubeType)
     {
-        float yDiff = (float)(cubeType - 1) / 4f;
+        float yDiffUp = 1 - (float)(cubeType - 1) / 4f;
+        float yDiffDown = 3f / 4 - (float)(cubeType - 1) / 4f;
+
         Vector2[] sideUV = new Vector2[4]{
-            new Vector2(0, 1 - yDiff),
-            new Vector2(1f/4, 1 - yDiff),
-            new Vector2(1f/4, 3f/4 - yDiff),
-            new Vector2(0, 3f/4 - yDiff)
+            new Vector2(0,    yDiffUp),
+            new Vector2(1f/4, yDiffUp),
+            new Vector2(1f/4, yDiffDown),
+            new Vector2(0,    yDiffDown)
         };
         Vector2[] topUV = new Vector2[4]{
-            new Vector2(1f/4, 1 - yDiff),
-            new Vector2(2f/4, 1 - yDiff),
-            new Vector2(2f/4, 3f/4 - yDiff),
-            new Vector2(1f/4, 3f/4 - yDiff)
+            new Vector2(1f/4, yDiffUp),
+            new Vector2(2f/4, yDiffUp),
+            new Vector2(2f/4, yDiffDown),
+            new Vector2(1f/4, yDiffDown)
         };
         Vector2[] bottomUV = new Vector2[4]{
-            new Vector2(2f/4, 1 - yDiff),
-            new Vector2(3f/4, 1 - yDiff),
-            new Vector2(3f/4, 3f/4 - yDiff),
-            new Vector2(2f/4, 3f/4 - yDiff)
+            new Vector2(2f/4, yDiffUp),
+            new Vector2(3f/4, yDiffUp),
+            new Vector2(3f/4, yDiffDown),
+            new Vector2(2f/4, yDiffDown)
         };
         if ((int)dir == 4)
         {
