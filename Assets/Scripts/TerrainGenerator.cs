@@ -78,7 +78,9 @@ public class TerrainGenerator : MonoBehaviour
                 // data.SetCell(x, yVal, z, 1);
                 for (int y = yVal - 1; y >= 0; y--)
                 {
+
                     data.SetCell(x, y, z, 1);
+
                 }
             }
         }
@@ -117,19 +119,29 @@ public class TerrainGenerator : MonoBehaviour
             }
         }
     }
-    int GetVertexIndex(VertexSignature signature)
+    BoolInt GetVertexIndex(VertexSignature signature)
     {
         //return new vertex index, 
         //if it doesn't exist we create new, 
         //if it does exist return last index
 
         int index;
+        bool add = false;
         if (!verticesDict.TryGetValue(signature, out index))
         {
             index = vertexCount++;
             verticesDict.Add(signature, index);
+            add = true;
         }
-        return index;
+        BoolInt bi;
+        bi.INT = index;
+        bi.BOOL = add;
+        return bi;
+    }
+    struct BoolInt
+    {
+        public int INT;
+        public bool BOOL;
     }
     void MakeFace(Direction dir, Vector3 pos, int cubeType)
     {
@@ -173,8 +185,16 @@ public class TerrainGenerator : MonoBehaviour
         {
             signature.position = faceVertices[i];
             Vector2 uv = CubeMeshData.GetVertexUV(dir, i, cubeType);
-            uvs.Add(uv);
-            triangleIndices[i] = GetVertexIndex(signature);
+            BoolInt res = GetVertexIndex(signature);
+            triangleIndices[i] = res.INT;
+            if (res.BOOL)
+            {
+                uvs.Add(uv);
+            }
+            else
+            {
+                uvs[res.INT] = uv;
+            }
         }
 
         triangles.Add(triangleIndices[0]);
