@@ -63,11 +63,9 @@ public static class CubeMeshData
     {
         return faceVertices((int)dir, pos);
     }
-
-    public static Vector2 GetVertexUV(Direction dir, Vector3 offset)
+    public static Vector2 GetVertexUV(Direction dir, int pos, int cubeType)
     {
-        Debug.Log(offset * 2);
-        return new Vector2();
+        return faceUVs(dir, cubeType)[pos];
     }
 
     public static Vector2[] faceUVs(Direction dir, int cubeType)
@@ -75,20 +73,20 @@ public static class CubeMeshData
         Vector2[] sideUV = new Vector2[4]{
             new Vector2(0, 1),
             new Vector2(1f/4, 1),
-            new Vector2(1f/4, 0),
-            new Vector2(0, 0)
+            new Vector2(1f/4, 3f/4),
+            new Vector2(0, 3f/4)
         };
         Vector2[] topUV = new Vector2[4]{
-            new Vector2(1f/4, 0),
             new Vector2(1f/4, 1),
             new Vector2(2f/4, 1),
-            new Vector2(2f/4, 0)
+            new Vector2(2f/4, 3f/4),
+            new Vector2(1f/4, 3f/4)
         };
         Vector2[] bottomUV = new Vector2[4]{
-            new Vector2(2f/4, 0),
             new Vector2(2f/4, 1),
-            new Vector2(1, 1),
-            new Vector2(1, 0)
+            new Vector2(3f/4, 1),
+            new Vector2(3f/4, 3f/4),
+            new Vector2(2f/4, 3f/4)
         };
         if ((int)dir == 4)
         {

@@ -11,6 +11,10 @@ public class TerrainGenerator : MonoBehaviour
     [Range(1, 200)]
     public int divisor = 98;
 
+    private Vector3 lastWorld;
+    public Vector3 world;
+    public int blocksGenerated = 0;
+
     List<Vector3> vertices = new List<Vector3>();
     Dictionary<VertexSignature, int> verticesDict = new Dictionary<VertexSignature, int>();
     int vertexCount = 0;
@@ -25,6 +29,7 @@ public class TerrainGenerator : MonoBehaviour
 
         lastSeed = seed;
         lastDivisor = divisor;
+        lastWorld = world;
 
         mesh = new Mesh();
         GetComponent<MeshFilter>().mesh = mesh;
@@ -36,10 +41,11 @@ public class TerrainGenerator : MonoBehaviour
 
     private void Update()
     {
-        if (lastDivisor != divisor || lastSeed != seed)
+        if (lastDivisor != divisor || lastSeed != seed || lastWorld != world)
         {
             lastDivisor = divisor;
             lastSeed = seed;
+            lastWorld = world;
             MakeWorld();
         }
         // seed += 0.1f;
@@ -47,6 +53,7 @@ public class TerrainGenerator : MonoBehaviour
 
     void MakeWorld()
     {
+        blocksGenerated = 0;
         vertexCount = 0;
         vertices.Clear();
         normals.Clear();
@@ -54,7 +61,7 @@ public class TerrainGenerator : MonoBehaviour
         uvs.Clear();
         triangles.Clear();
 
-        int depth = 1, width = 1, height = 1;
+        int depth = (int)world.z, width = (int)world.x, height = (int)world.y;
 
         Noise.Seed = (int)seed; // Optional
         float scale = 0.10f;
@@ -91,6 +98,7 @@ public class TerrainGenerator : MonoBehaviour
                     if (cubeType != 0)
                     {
                         MakeCube(new Vector3(x, y, z), data, cubeType);
+                        blocksGenerated++;
                     }
                 }
             }
@@ -146,38 +154,50 @@ public class TerrainGenerator : MonoBehaviour
 
         Vector3[] faceVertices = CubeMeshData.faceVertices(dir, pos);
         int[] triangleIndices = new int[4];
+        signature.cubeType = cubeType;
 
-        signature.position = faceVertices[0];
+        // signature.position = faceVertices[0];
+        // Vector2 uva = CubeMeshData.GetVertexUV(dir, 0, cubeType);
+        // int a = GetVertexIndex(signature);
 
+        // signature.position = faceVertices[1];
+        // int b = GetVertexIndex(signature);
 
-        int a = GetVertexIndex(signature);
+        // signature.position = faceVertices[2];
+        // int c = GetVertexIndex(signature);
 
-        signature.position = faceVertices[1];
+        // signature.position = faceVertices[3];
+        // int d = GetVertexIndex(signature);
 
+        for (int i = 0; i < 4; i++)
+        {
+            signature.position = faceVertices[i];
+            Vector2 uv = CubeMeshData.GetVertexUV(dir, i, cubeType);
+            uvs.Add(uv);
+            triangleIndices[i] = GetVertexIndex(signature);
+        }
 
-        int b = GetVertexIndex(signature);
+        triangles.Add(triangleIndices[0]);
+        triangles.Add(triangleIndices[1]);
+        triangles.Add(triangleIndices[2]);
 
-        signature.position = faceVertices[2];
-
-
-        int c = GetVertexIndex(signature);
-
-        signature.position = faceVertices[3];
-
-
-        int d = GetVertexIndex(signature);
+        triangles.Add(triangleIndices[0]);
+        triangles.Add(triangleIndices[2]);
+        triangles.Add(triangleIndices[3]);
 
         // uvs.AddRange(CubeMeshData.faceUVs(dir, cubeType));
 
-        int zero = verticesDict.Count - 4;
+        // int zero = verticesDict.Count - 4;
 
-        triangles.Add(a);
-        triangles.Add(b);
-        triangles.Add(c);
+        // triangles.Add(a);
+        // triangles.Add(b);
+        // triangles.Add(c);
 
-        triangles.Add(a);
-        triangles.Add(c);
-        triangles.Add(d);
+        // triangles.Add(a);
+        // triangles.Add(c);
+        // triangles.Add(d);
+
+
     }
 
     void SetFinalData()
@@ -189,7 +209,6 @@ public class TerrainGenerator : MonoBehaviour
             normals.Add(CubeMeshData.offsets[(int)pair.Key.normal].ToVector());
 
             // Vector3 uv = ProjectPositionToUV(pair.key.position, pair.key.normal);
-            // Vector2 uv = CubeMeshData.GetVertexUV(pair.Key.normal);
             // uvs[index] = uv;
         }
 
@@ -206,7 +225,7 @@ public class TerrainGenerator : MonoBehaviour
         mesh.vertices = vertices.ToArray();
         mesh.triangles = triangles.ToArray();
         mesh.normals = normals.ToArray();
-        // mesh.uv = uvs.ToArray();
+        mesh.uv = uvs.ToArray();
         // mesh.RecalculateNormals();
     }
 
@@ -215,5 +234,6 @@ public class TerrainGenerator : MonoBehaviour
         public Vector3 position;
         public Direction normal;
 
+        public int cubeType;
     };
 }
