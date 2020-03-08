@@ -68,6 +68,27 @@ public static class CubeMeshData
         return faceUVs(dir, cubeType)[pos];
     }
 
+    public static Vector2 ProjectPositionToUV(Vector3 position, Direction normal)
+    {
+
+        switch (normal)
+        {
+            case Direction.Up:
+            case Direction.Down:
+                return new Vector2(position.x, position.z);
+            case Direction.East:
+            case Direction.West:
+                return new Vector2(position.z, position.y);
+            case Direction.North:
+            case Direction.South:
+                return new Vector2(position.x, position.y);
+        }
+
+        // Fallback for an invalid input direction.
+        return Vector2.zero;
+    }
+
+
     public static Vector2[] faceUVs(Direction dir, int cubeType)
     {
         float yDiffUp = 1 - (float)(cubeType - 1) / 4f;

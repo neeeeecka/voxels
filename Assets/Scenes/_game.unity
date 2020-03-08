@@ -154,7 +154,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   seed: 2055000
   divisor: 33
-  world: {x: 2, y: 1, z: 1}
+  world: {x: 6, y: 1, z: 1}
   blocksGenerated: 0
 --- !u!4 &992339430
 Transform:
