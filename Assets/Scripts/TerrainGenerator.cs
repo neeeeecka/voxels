@@ -80,9 +80,7 @@ public class TerrainGenerator : MonoBehaviour
                 // data.SetCell(x, yVal, z, 1);
                 for (int y = yVal - 1; y >= 0; y--)
                 {
-
-                    data.SetCell(x, y, z, 1);
-
+                    data.SetCell(x, y, z, (int)Random.Range(1, 4));
                 }
             }
         }
