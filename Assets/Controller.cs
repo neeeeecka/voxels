@@ -17,7 +17,8 @@ public class Controller : MonoBehaviour
 
     public Transform head;
 
-    public float acceleration = 0;
+
+    private float LiveRunMultiplier = 1;
     // Start is called before the first frame update
     void Start()
     {
@@ -25,37 +26,69 @@ public class Controller : MonoBehaviour
         controller = GetComponent<CharacterController>();
         // hitLayer = LayerMask.NameToLayer("world");
     }
+
+
+    public bool isRunning = false;
     private Vector3 moveDirection = Vector3.zero;
+
+    private bool wasFirst = false;
+    IEnumerator ResetTimer()
+    {
+        yield return new WaitForSeconds(1);
+        wasFirst = false;
+    }
 
     // Update is called once per frame
     void Update()
     {
+
         float vAxis = Input.GetAxis("Vertical");
         float hAxis = Input.GetAxis("Horizontal");
-
-        moveDirection = transform.TransformDirection(new Vector3(hAxis * sidewaysSpeed, moveDirection.y, vAxis * forwardSpeed));
-        moveDirection.y -= gravity * Time.deltaTime;
 
         if (isGrounded)
         {
             moveDirection.y = 0;
-            acceleration = 0;
-            if (Input.GetKeyDown(KeyCode.Space))
+            if (Input.GetKey(KeyCode.Space))
             {
                 moveDirection.y = jumpForce;
             }
+
+            if (Input.GetKeyDown(KeyCode.W))
+            {
+                if (wasFirst)
+                {
+                    LiveRunMultiplier = 1.5f;
+                    isRunning = true;
+                }
+                else
+                {
+                    wasFirst = true;
+                    StartCoroutine(ResetTimer());
+                }
+            }
+            if (Input.GetKeyUp(KeyCode.W))
+            {
+                LiveRunMultiplier = 1;
+                isRunning = false;
+            }
         }
+
+        moveDirection = transform.TransformDirection(new Vector3(hAxis * sidewaysSpeed, moveDirection.y, vAxis * forwardSpeed * LiveRunMultiplier));
+        moveDirection.y -= gravity * Time.deltaTime;
 
         controller.Move(moveDirection * Time.deltaTime);
 
-        float mouseX = Input.GetAxis("Mouse X");
-        float mouseY = Input.GetAxis("Mouse Y");
+        if (Cursor.lockState == CursorLockMode.Locked)
+        {
+            float mouseX = Input.GetAxis("Mouse X");
+            float mouseY = Input.GetAxis("Mouse Y");
 
-        Vector3 currentRotation = transform.rotation.eulerAngles;
-        transform.rotation = Quaternion.Euler(0, currentRotation.y + mouseX * rotationSpeed, 0);
+            Vector3 currentRotation = transform.rotation.eulerAngles;
+            transform.rotation = Quaternion.Euler(0, currentRotation.y + mouseX * rotationSpeed, 0);
 
-        Vector3 currentHeadRotation = head.localRotation.eulerAngles;
-        head.localRotation = Quaternion.Euler(currentHeadRotation.x - mouseY * rotationSpeed, 0, 0);
+            Vector3 currentHeadRotation = head.localRotation.eulerAngles;
+            head.localRotation = Quaternion.Euler(currentHeadRotation.x - mouseY * rotationSpeed, 0, 0);
+        }
 
         Ray ray = new Ray(transform.position, Vector3.down);
         Debug.DrawRay(transform.position, Vector3.down * 1f, Color.red);
@@ -68,6 +101,7 @@ public class Controller : MonoBehaviour
         {
             isGrounded = false;
         }
+
 
     }
 }
