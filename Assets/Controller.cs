@@ -17,13 +17,14 @@ public class Controller : MonoBehaviour
 
     public Transform head;
 
-
+    public Animator animator;
     private float LiveRunMultiplier = 1;
     // Start is called before the first frame update
     void Start()
     {
 
         controller = GetComponent<CharacterController>();
+        animator = GetComponent<Animator>();
         // hitLayer = LayerMask.NameToLayer("world");
     }
 
@@ -34,7 +35,7 @@ public class Controller : MonoBehaviour
     private bool wasFirst = false;
     IEnumerator ResetTimer()
     {
-        yield return new WaitForSeconds(1);
+        yield return new WaitForSeconds(0.5f);
         wasFirst = false;
     }
 
@@ -59,6 +60,7 @@ public class Controller : MonoBehaviour
                 {
                     LiveRunMultiplier = 1.5f;
                     isRunning = true;
+                    animator.SetBool("isRunning", true);
                 }
                 else
                 {
@@ -70,6 +72,8 @@ public class Controller : MonoBehaviour
             {
                 LiveRunMultiplier = 1;
                 isRunning = false;
+                animator.SetBool("isRunning", false);
+
             }
         }
 
