@@ -58,7 +58,6 @@ public class TerrainGenerator : MonoBehaviour
             lastWorld = chunkSize;
             MakeWorld();
         }
-        // seed += 0.1f;
     }
     void ClearWorld()
     {
@@ -86,8 +85,7 @@ public class TerrainGenerator : MonoBehaviour
                 // data.SetCell(x, yVal, z, 1);
                 for (int y = yVal - 1; y >= 0; y--)
                 {
-                    int cubeType = (int)Random.Range(1, 4);
-                    // int cubeType = 1;
+                    int cubeType = 5 - (int)Mathf.Clamp(noiseValues[z, x] / divisor, 1, 4);
                     data.SetCell(x, y, z, cubeType);
                 }
             }
