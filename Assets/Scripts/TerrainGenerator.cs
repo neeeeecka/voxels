@@ -24,6 +24,10 @@ public class TerrainGenerator : MonoBehaviour
     List<Vector3> uvs = new List<Vector3>();
     Mesh mesh;
 
+    VoxelData data;
+    private MeshFilter meshFilter;
+    private MeshCollider meshCollider;
+
     void Start()
     {
 
@@ -32,10 +36,14 @@ public class TerrainGenerator : MonoBehaviour
         lastWorld = world;
 
         mesh = new Mesh();
-        GetComponent<MeshFilter>().mesh = mesh;
+        meshFilter = GetComponent<MeshFilter>();
+        meshCollider = GetComponent<MeshCollider>();
+
+        meshFilter.mesh = mesh;
         mesh.MarkDynamic();
         MakeWorld();
-        GetComponent<MeshCollider>().sharedMesh = mesh;
+
+        meshCollider.sharedMesh = mesh;
 
         AssetDatabase.CreateAsset(mesh, "Assets/Temp/mesh.asset");
 
@@ -52,8 +60,7 @@ public class TerrainGenerator : MonoBehaviour
         }
         // seed += 0.1f;
     }
-
-    void MakeWorld()
+    void ClearWorld()
     {
         blocksGenerated = 0;
         vertexCount = 0;
@@ -62,6 +69,10 @@ public class TerrainGenerator : MonoBehaviour
         verticesDict.Clear();
         uvs.Clear();
         triangles.Clear();
+    }
+    void MakeWorld()
+    {
+        ClearWorld();
 
         int depth = (int)world.z, width = (int)world.x, height = (int)world.y;
 
@@ -69,8 +80,7 @@ public class TerrainGenerator : MonoBehaviour
         float scale = 0.10f;
         float[,] noiseValues = Noise.Calc2D(depth, width, scale);
 
-        VoxelData data = new VoxelData(width, height, depth);
-
+        data = new VoxelData(width, height, depth);
 
         for (int x = 0; x < width; x++)
         {
@@ -87,10 +97,17 @@ public class TerrainGenerator : MonoBehaviour
             }
         }
 
+        DrawWorld();
+        UpdateMesh();
+
+    }
+
+    public void DrawWorld()
+    {
+
         int w = data.Width();
         int d = data.Depth();
         int h = data.Height();
-
 
         for (int y = 0; y < h; y++)
         {
@@ -107,9 +124,17 @@ public class TerrainGenerator : MonoBehaviour
                 }
             }
         }
-        UpdateMesh();
     }
 
+    public void EditWorld(int x, int y, int z, int cubeType)
+    {
+        ClearWorld();
+
+        data.SetCell(x, y, z, cubeType);
+        DrawWorld();
+
+        UpdateMesh();
+    }
     void MakeCube(Vector3 pos, VoxelData data, int cubeType)
     {
         for (int i = 0; i < 6; i++)
@@ -219,11 +244,12 @@ public class TerrainGenerator : MonoBehaviour
         SetFinalData();
 
         // mesh.vertices = JustConvertDictionaryToVertices();
-
         mesh.vertices = vertices.ToArray();
         mesh.triangles = triangles.ToArray();
         mesh.normals = normals.ToArray();
         mesh.SetUVs(0, uvs);
+        meshCollider.sharedMesh = mesh;
+
         // mesh.uv = uvs.ToArray();
         // mesh.RecalculateNormals();
     }

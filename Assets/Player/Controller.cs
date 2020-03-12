@@ -61,6 +61,7 @@ public class Controller : MonoBehaviour
                     LiveRunMultiplier = 1.5f;
                     isRunning = true;
                     animator.SetBool("isRunning", true);
+
                 }
                 else
                 {
@@ -68,12 +69,11 @@ public class Controller : MonoBehaviour
                     StartCoroutine(ResetTimer());
                 }
             }
-            if (Input.GetKeyUp(KeyCode.W))
+            if (!Input.GetKey(KeyCode.W))
             {
                 LiveRunMultiplier = 1;
                 isRunning = false;
                 animator.SetBool("isRunning", false);
-
             }
         }
 

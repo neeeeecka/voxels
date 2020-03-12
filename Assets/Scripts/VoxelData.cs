@@ -16,7 +16,6 @@ public class VoxelData
         {{ 1, 1, 0, 0, 1, 1 }},
         {{ 1, 1, 1, 1, 1, 1 }},
         {{ 1, 1, 1, 1, 1, 1 }}
-
     };
 
     public VoxelData(int x, int y, int z)
