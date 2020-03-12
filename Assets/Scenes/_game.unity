@@ -425,7 +425,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   seed: 2055000
-  divisor: 32
+  scale: 0.05
+  maxTerrainHeight: 10
   chunkSize: 32
   blocksGenerated: 0
 --- !u!4 &992339430

@@ -5,12 +5,12 @@ using UnityEditor;
 
 public class TerrainGenerator : MonoBehaviour
 {
-    private float lastSeed = 0;
-    private int lastDivisor = 0;
-    public float seed = 209323094;
-    [Range(1, 200)]
-    public int divisor = 98;
+    private float lastScale = 0, lastHeight = 0;
+    [Range(0, 0.1f)]
+    public float scale = 0.01f;
+    [Range(1, 32)]
 
+    public int maxTerrainHeight = 10;
     private int lastWorld;
     public int chunkSize;
     public int blocksGenerated = 0;
@@ -31,9 +31,8 @@ public class TerrainGenerator : MonoBehaviour
     void Start()
     {
 
-        lastSeed = seed;
-        lastDivisor = divisor;
-        lastWorld = chunkSize;
+        lastScale = scale;
+        lastHeight = maxTerrainHeight;
 
         mesh = new Mesh();
         meshFilter = GetComponent<MeshFilter>();
@@ -51,11 +50,10 @@ public class TerrainGenerator : MonoBehaviour
 
     private void Update()
     {
-        if (lastDivisor != divisor || lastSeed != seed || lastWorld != chunkSize)
+        if (lastScale != scale || lastHeight != maxTerrainHeight)
         {
-            lastDivisor = divisor;
-            lastSeed = seed;
-            lastWorld = chunkSize;
+            lastScale = scale;
+            lastHeight = maxTerrainHeight;
             MakeWorld();
         }
     }
@@ -69,11 +67,14 @@ public class TerrainGenerator : MonoBehaviour
         uvs.Clear();
         triangles.Clear();
     }
+
+    int getNoiseValue(float x, float y)
+    {
+        return Mathf.FloorToInt(Mathf.PerlinNoise(x * scale, y * scale) * maxTerrainHeight);
+    }
+
     void MakeWorld()
     {
-        Noise.Seed = (int)seed;
-        float scale = 0.10f;
-        float[,] noiseValues = Noise.Calc2D(chunkSize, chunkSize, scale);
 
         data = new VoxelData(chunkSize, chunkSize, chunkSize);
 
@@ -81,11 +82,16 @@ public class TerrainGenerator : MonoBehaviour
         {
             for (int z = 0; z < chunkSize; z++)
             {
-                int yVal = (int)Mathf.Clamp(noiseValues[z, x] / divisor, 0, chunkSize);
+                int yVal = getNoiseValue(z, x);
+
                 // data.SetCell(x, yVal, z, 1);
                 for (int y = yVal - 1; y >= 0; y--)
                 {
-                    int cubeType = 5 - (int)Mathf.Clamp(noiseValues[z, x] / divisor, 1, 4);
+                    int cubeType = 4 - Mathf.FloorToInt((float)yVal / (float)maxTerrainHeight * 4);
+                    // int cubeType = 1;
+                    // Debug.Log(cubeType);
+
+
                     data.SetCell(x, y, z, cubeType);
                 }
             }
