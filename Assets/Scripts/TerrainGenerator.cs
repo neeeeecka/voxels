@@ -72,7 +72,6 @@ public class TerrainGenerator : MonoBehaviour
     }
     void MakeWorld()
     {
-        ClearWorld();
         Noise.Seed = (int)seed;
         float scale = 0.10f;
         float[,] noiseValues = Noise.Calc2D(chunkSize, chunkSize, scale);
@@ -94,13 +93,14 @@ public class TerrainGenerator : MonoBehaviour
             }
         }
 
-        DrawWorld();
+        MakeChunk();
         UpdateMesh();
 
     }
 
-    public void DrawWorld()
+    public void MakeChunk()
     {
+        ClearWorld();
 
         for (int y = 0; y < chunkSize; y++)
         {
@@ -121,10 +121,8 @@ public class TerrainGenerator : MonoBehaviour
 
     public void EditWorld(int x, int y, int z, int cubeType)
     {
-        ClearWorld();
-
         data.SetCell(x, y, z, cubeType);
-        DrawWorld();
+        MakeChunk();
 
         UpdateMesh();
     }
@@ -134,8 +132,7 @@ public class TerrainGenerator : MonoBehaviour
         {
             if (data.GetNeighbor((int)pos.x, (int)pos.y, (int)pos.z, (Direction)i) == 0)
             {
-                // MakeFace((Direction)i, pos, cubeType);
-                MakeFaceClean((Direction)i, pos, cubeType);
+                MakeFace((Direction)i, pos, cubeType);
             }
         }
     }
@@ -151,10 +148,8 @@ public class TerrainGenerator : MonoBehaviour
         return index;
     }
 
-    void MakeFaceClean(Direction dir, Vector3 pos, int cubeType)
+    void MakeFace(Direction dir, Vector3 pos, int cubeType)
     {
-
-        // vertices.AddRange(CubeMeshData.faceVertices(dir, pos));
         VertexSignature signature;
         signature.normal = dir;
 
@@ -193,23 +188,18 @@ public class TerrainGenerator : MonoBehaviour
             uv.z = pair.Key.cubeType;
             uvs.Add(uv);
         }
-
     }
 
     void UpdateMesh()
     {
-        mesh.Clear();
-
         PrepareMeshData();
 
-        // mesh.vertices = JustConvertDictionaryToVertices();
+        mesh.Clear();
         mesh.vertices = vertices.ToArray();
         mesh.triangles = triangles.ToArray();
         mesh.normals = normals.ToArray();
         mesh.SetUVs(0, uvs);
         meshCollider.sharedMesh = mesh;
-        // mesh.uv = uvs.ToArray();
-        // mesh.RecalculateNormals();
     }
 
     struct VertexSignature
