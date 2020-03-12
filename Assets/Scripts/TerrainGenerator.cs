@@ -11,8 +11,8 @@ public class TerrainGenerator : MonoBehaviour
     [Range(1, 200)]
     public int divisor = 98;
 
-    private Vector3 lastWorld;
-    public Vector3 world;
+    private int lastWorld;
+    public int chunkSize;
     public int blocksGenerated = 0;
 
     List<Vector3> vertices = new List<Vector3>();
@@ -33,7 +33,7 @@ public class TerrainGenerator : MonoBehaviour
 
         lastSeed = seed;
         lastDivisor = divisor;
-        lastWorld = world;
+        lastWorld = chunkSize;
 
         mesh = new Mesh();
         meshFilter = GetComponent<MeshFilter>();
@@ -51,11 +51,11 @@ public class TerrainGenerator : MonoBehaviour
 
     private void Update()
     {
-        if (lastDivisor != divisor || lastSeed != seed || lastWorld != world)
+        if (lastDivisor != divisor || lastSeed != seed || lastWorld != chunkSize)
         {
             lastDivisor = divisor;
             lastSeed = seed;
-            lastWorld = world;
+            lastWorld = chunkSize;
             MakeWorld();
         }
         // seed += 0.1f;
@@ -73,20 +73,17 @@ public class TerrainGenerator : MonoBehaviour
     void MakeWorld()
     {
         ClearWorld();
-
-        int depth = (int)world.z, width = (int)world.x, height = (int)world.y;
-
-        Noise.Seed = (int)seed; // Optional
+        Noise.Seed = (int)seed;
         float scale = 0.10f;
-        float[,] noiseValues = Noise.Calc2D(depth, width, scale);
+        float[,] noiseValues = Noise.Calc2D(chunkSize, chunkSize, scale);
 
-        data = new VoxelData(width, height, depth);
+        data = new VoxelData(chunkSize, chunkSize, chunkSize);
 
-        for (int x = 0; x < width; x++)
+        for (int x = 0; x < chunkSize; x++)
         {
-            for (int z = 0; z < depth; z++)
+            for (int z = 0; z < chunkSize; z++)
             {
-                int yVal = (int)Mathf.Clamp(noiseValues[z, x] / divisor, 0, height);
+                int yVal = (int)Mathf.Clamp(noiseValues[z, x] / divisor, 0, chunkSize);
                 // data.SetCell(x, yVal, z, 1);
                 for (int y = yVal - 1; y >= 0; y--)
                 {
@@ -105,15 +102,11 @@ public class TerrainGenerator : MonoBehaviour
     public void DrawWorld()
     {
 
-        int w = data.Width();
-        int d = data.Depth();
-        int h = data.Height();
-
-        for (int y = 0; y < h; y++)
+        for (int y = 0; y < chunkSize; y++)
         {
-            for (int x = 0; x < w; x++)
+            for (int x = 0; x < chunkSize; x++)
             {
-                for (int z = 0; z < d; z++)
+                for (int z = 0; z < chunkSize; z++)
                 {
                     int cubeType = data.GetCell(x, y, z);
                     if (cubeType != 0)
@@ -146,44 +139,18 @@ public class TerrainGenerator : MonoBehaviour
             }
         }
     }
-    BoolInt GetVertexIndex(VertexSignature signature)
+    int GetVertexIndex(VertexSignature signature)
     {
-        //return new vertex index, 
-        //if it doesn't exist we create new, 
-        //if it does exist return last index
-
         int index;
-        bool add = false;
         if (!verticesDict.TryGetValue(signature, out index))
         {
             index = vertexCount++;
             verticesDict.Add(signature, index);
-            add = true;
         }
-        BoolInt bi;
-        bi.INT = index;
-        bi.BOOL = add;
-        return bi;
-    }
-    struct BoolInt
-    {
-        public int INT;
-        public bool BOOL;
-    }
-    void MakeFace(Direction dir, Vector3 pos, int cubeType)
-    {
-        vertices.AddRange(CubeMeshData.faceVertices(dir, pos));
-        // uvs.AddRange(CubeMeshData.getProjectedUvs(dir, cubeType));
 
-        int zero = vertices.Count - 4;
-
-        triangles.Add(zero);
-        triangles.Add(zero + 1);
-        triangles.Add(zero + 2);
-        triangles.Add(zero);
-        triangles.Add(zero + 2);
-        triangles.Add(zero + 3);
+        return index;
     }
+
     void MakeFaceClean(Direction dir, Vector3 pos, int cubeType)
     {
 
@@ -198,20 +165,11 @@ public class TerrainGenerator : MonoBehaviour
         for (int i = 0; i < 4; i++)
         {
             signature.position = faceVertices[i];
-            // Vector2 uv = CubeMeshData.GetVertexUV(dir, i, cubeType);
             Vector3 uv = CubeMeshData.ProjectPositionToUV(signature.position, dir);
             uv.z = signature.cubeType;
 
-            BoolInt res = GetVertexIndex(signature);
-            triangleIndices[i] = res.INT;
-            if (res.BOOL)
-            {
-                uvs.Add(uv);
-            }
-            else
-            {
-                uvs[res.INT] = uv;
-            }
+            int vertex = GetVertexIndex(signature);
+            triangleIndices[i] = vertex;
         }
 
         triangles.Add(triangleIndices[0]);
@@ -223,7 +181,7 @@ public class TerrainGenerator : MonoBehaviour
         triangles.Add(triangleIndices[3]);
     }
 
-    void SetFinalData()
+    void PrepareMeshData()
     {
         foreach (var pair in verticesDict)
         {
@@ -231,8 +189,9 @@ public class TerrainGenerator : MonoBehaviour
             vertices.Add(pair.Key.position);
             normals.Add(CubeMeshData.offsets[(int)pair.Key.normal].ToVector());
 
-            // Vector3 uv = ProjectPositionToUV(pair.key.position, pair.key.normal);
-            // uvs[index] = uv;
+            Vector3 uv = CubeMeshData.ProjectPositionToUV(pair.Key.position, pair.Key.normal);
+            uv.z = pair.Key.cubeType;
+            uvs.Add(uv);
         }
 
     }
@@ -241,7 +200,7 @@ public class TerrainGenerator : MonoBehaviour
     {
         mesh.Clear();
 
-        SetFinalData();
+        PrepareMeshData();
 
         // mesh.vertices = JustConvertDictionaryToVertices();
         mesh.vertices = vertices.ToArray();
@@ -249,7 +208,6 @@ public class TerrainGenerator : MonoBehaviour
         mesh.normals = normals.ToArray();
         mesh.SetUVs(0, uvs);
         meshCollider.sharedMesh = mesh;
-
         // mesh.uv = uvs.ToArray();
         // mesh.RecalculateNormals();
     }
