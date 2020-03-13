@@ -52,6 +52,9 @@ public class TerrainGeneratorAsync : MonoBehaviour
 
     List<Action> functionsQueue = new List<Action>();
 
+
+
+
     private void Update()
     {
         if (lastScale != scale || lastHeight != maxTerrainHeight)

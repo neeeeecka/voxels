@@ -58,6 +58,11 @@ public class Controller : MonoBehaviour
 
         }
 
+        if(Input.GetMouseButton(0) || Input.GetMouseButton(1))
+        {
+            animator.SetBool("handUse", true);
+        }
+
 
         if (isGrounded)
         {
