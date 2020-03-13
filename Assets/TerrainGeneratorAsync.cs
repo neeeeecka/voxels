@@ -29,6 +29,8 @@ public class TerrainGeneratorAsync : MonoBehaviour
     private MeshFilter meshFilter;
     private MeshCollider meshCollider;
 
+    public bool threadFinished = true;
+
     void Start()
     {
 
@@ -42,11 +44,9 @@ public class TerrainGeneratorAsync : MonoBehaviour
         mesh.MarkDynamic();
 
         SetWorldData();
-        AsyncChunkUpdate();
+        ChunkUpdate();
 
-        //meshCollider.sharedMesh = mesh;
-
-        //AssetDatabase.CreateAsset(mesh, "Assets/Temp/mesh.asset");
+        AssetDatabase.CreateAsset(mesh, "Assets/Temp/mesh.asset");
 
     }
 
@@ -68,7 +68,10 @@ public class TerrainGeneratorAsync : MonoBehaviour
     public void EditWorld(int x, int y, int z, int cubeType)
     {
         data.SetCell(x, y, z, cubeType);
-        AsyncChunkUpdate();
+        if (threadFinished)
+        {
+            Async(ChunkUpdate);
+        }
     }
 
     void SetWorldData()
@@ -91,7 +94,7 @@ public class TerrainGeneratorAsync : MonoBehaviour
     }
 
 
-    public void AsyncChunkUpdate() {
+    public void ChunkUpdate() {
         MakeChunk();
 
         PrepareMeshData();
@@ -108,6 +111,8 @@ public class TerrainGeneratorAsync : MonoBehaviour
             mesh.normals = normalsArr;
             mesh.SetUVs(0, uvs);
             meshCollider.sharedMesh = mesh;
+
+            threadFinished = true;
         };
 
         functionsQueue.Add(toThread);
@@ -192,9 +197,10 @@ public class TerrainGeneratorAsync : MonoBehaviour
     }
 
 
-    public void StartChunkGeneratorThread(Action func) {
+    public void Async(Action func) {
         Thread thread = new Thread(new ThreadStart(func));
         thread.Start();
+        threadFinished = false;
     }
 
     struct VertexSignature

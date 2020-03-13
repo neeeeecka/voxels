@@ -243,7 +243,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 46562fe6b9629de42a0e6b57a8f7f760, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  terrain: {fileID: 992339429}
+  terrain: {fileID: 992339434}
   controller: {fileID: 180470657}
   hitLayer:
     serializedVersion: 2
@@ -420,7 +420,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 992339428}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ec96a82ddbc45c9418ee4474e822ba90, type: 3}
   m_Name: 
@@ -510,7 +510,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 992339428}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a8fc8f330e66df54ba05456dfb4e16eb, type: 3}
   m_Name: 
