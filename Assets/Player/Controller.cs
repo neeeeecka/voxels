@@ -30,6 +30,8 @@ public class Controller : MonoBehaviour
 
 
     public bool isRunning = false;
+    public bool isWalking = false;
+
     private Vector3 moveDirection = Vector3.zero;
 
     private bool wasFirst = false;
@@ -56,6 +58,9 @@ public class Controller : MonoBehaviour
 
             if (Input.GetKeyDown(KeyCode.W))
             {
+                isWalking = true;
+                animator.SetBool("isWalking", true);
+
                 if (wasFirst)
                 {
                     LiveRunMultiplier = 1.5f;
@@ -74,6 +79,8 @@ public class Controller : MonoBehaviour
                 LiveRunMultiplier = 1;
                 isRunning = false;
                 animator.SetBool("isRunning", false);
+                animator.SetBool("isWalking", false);
+                isWalking = false;
             }
         }
 
