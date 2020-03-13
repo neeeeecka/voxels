@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class Build : MonoBehaviour
 {
-    public TerrainGenerator terrain;
+    public TerrainGeneratorAsync terrain;
     public Controller controller;
     public LayerMask hitLayer;
 
