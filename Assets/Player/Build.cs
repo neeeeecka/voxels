@@ -34,11 +34,11 @@ public class Build : MonoBehaviour
             int y = Mathf.FloorToInt(worldPos.y);
             int z = Mathf.FloorToInt(worldPos.z);
 
-            if (Input.GetMouseButtonDown(0))
+            if (Input.GetMouseButton(0))
             {
                 terrain.EditWorld(x, y, z, 0);
             }
-            if (Input.GetMouseButtonDown(1))
+            if (Input.GetMouseButton(1))
             {
                 terrain.EditWorld(x + (int)hitDir.x, y + (int)hitDir.y, z + (int)hitDir.z, 1);
             }
