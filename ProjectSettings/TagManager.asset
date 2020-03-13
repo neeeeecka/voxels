@@ -16,8 +16,8 @@ TagManager:
   - PostProcessing
   - world
   - player
-  - 
-  - 
+  - firstPersonView
+  - thirdPersonView
   - 
   - 
   - 

@@ -48,6 +48,17 @@ public class Controller : MonoBehaviour
         float vAxis = Input.GetAxis("Vertical");
         float hAxis = Input.GetAxis("Horizontal");
 
+        if (vAxis + hAxis != 0)
+        {
+            animator.SetBool("isWalking", true);
+        }
+        else
+        {
+            animator.SetBool("isWalking", false);
+
+        }
+
+
         if (isGrounded)
         {
             moveDirection.y = 0;
@@ -59,7 +70,6 @@ public class Controller : MonoBehaviour
             if (Input.GetKeyDown(KeyCode.W))
             {
                 isWalking = true;
-                animator.SetBool("isWalking", true);
 
                 if (wasFirst)
                 {
@@ -79,7 +89,6 @@ public class Controller : MonoBehaviour
                 LiveRunMultiplier = 1;
                 isRunning = false;
                 animator.SetBool("isRunning", false);
-                animator.SetBool("isWalking", false);
                 isWalking = false;
             }
         }
