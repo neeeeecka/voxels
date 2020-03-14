@@ -53,8 +53,6 @@ public class TerrainGeneratorAsync : MonoBehaviour
     List<Action> functionsQueue = new List<Action>();
 
 
-
-
     private void Update()
     {
         if (lastScale != scale || lastHeight != maxTerrainHeight)
@@ -66,14 +64,17 @@ public class TerrainGeneratorAsync : MonoBehaviour
             Action func = functionsQueue[0];
             functionsQueue.RemoveAt(0);
             func();
+
         }
     }
     public void EditWorld(int x, int y, int z, int cubeType)
     {
-        data.SetCell(x, y, z, cubeType);
         if (threadFinished)
         {
+            data.SetCell(x, y, z, cubeType);
+
             Async(ChunkUpdate);
+            //ChunkUpdate();
         }
     }
 
@@ -114,8 +115,8 @@ public class TerrainGeneratorAsync : MonoBehaviour
             mesh.normals = normalsArr;
             mesh.SetUVs(0, uvs);
             meshCollider.sharedMesh = mesh;
-
             threadFinished = true;
+
         };
 
         functionsQueue.Add(toThread);
