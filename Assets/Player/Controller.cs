@@ -48,7 +48,7 @@ public class Controller : MonoBehaviour
         float vAxis = Input.GetAxis("Vertical");
         float hAxis = Input.GetAxis("Horizontal");
 
-        if (vAxis + hAxis != 0)
+        if (Mathf.Abs(vAxis) + Mathf.Abs(hAxis) != 0)
         {
             animator.SetBool("isWalking", true);
         }
