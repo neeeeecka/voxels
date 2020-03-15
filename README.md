@@ -1,6 +1,6 @@
-# minecraft
+# voxel world
 
 
-Highly optimized minecraft written on C# using unity.
+voxel open world game written on C# using unity.
 
-launchable .exe at /build folder
+launchable .exe at /build folder.
