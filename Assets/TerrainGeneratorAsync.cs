@@ -193,6 +193,8 @@ public class TerrainGeneratorAsync : MonoBehaviour
             triangleIndices[3]
             }
         );
+
+
     }
     void PrepareMeshData()
     {
@@ -222,6 +224,18 @@ public class TerrainGeneratorAsync : MonoBehaviour
         public Direction normal;
 
         public int cubeType;
+
+        public override int GetHashCode()
+        {
+            uint h = 0x811c9dc5;
+            h = (h ^ (uint)position.x) * 0x01000193;
+            h = (h ^ (uint)position.y) * 0x01000193;
+            h = (h ^ (uint)position.z) * 0x01000193;
+            h = (h ^ (uint)normal) * 0x01000193;
+            h = (h ^ (uint)cubeType) * 0x01000193;
+
+            return (int)h;
+        }
     };
     int GetNoiseValue(float x, float y)
     {
