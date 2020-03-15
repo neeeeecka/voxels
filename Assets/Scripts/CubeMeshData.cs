@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Unity.Mathematics;
 
 public static class CubeMeshData
 {
@@ -50,18 +51,16 @@ public static class CubeMeshData
         new int[]{3,2,7,6}  //Down
     };
 
-    public static Vector3[] faceVertices(int dir, Vector3 pos)
+    public static Vector3[] faceVertices(int dir, int x, int y, int z)
     {
         Vector3[] fv = new Vector3[4];
+        Vector3 pos = new Vector3(x,y,z);
+
         for (int i = 0; i < 4; i++)
         {
             fv[i] = (vertices[faces[dir][i]]) * 0.5f + pos;
         }
         return fv;
-    }
-    public static Vector3[] faceVertices(Direction dir, Vector3 pos)
-    {
-        return faceVertices((int)dir, pos);
     }
     public static Vector2 GetVertexUV(Direction dir, int pos, int cubeType)
     {
@@ -91,8 +90,8 @@ public static class CubeMeshData
 
     public static Vector2[] faceUVs(Direction dir, int cubeType)
     {
-        float yDiffUp = 1 - (float)(cubeType - 1) / 4f;
-        float yDiffDown = 3f / 4 - (float)(cubeType - 1) / 4f;
+        float yDiffUp = 1 - (cubeType - 1) / 4f;
+        float yDiffDown = 3f / 4 - (cubeType - 1) / 4f;
 
         Vector2[] sideUV = new Vector2[4]{
             new Vector2(0,    yDiffUp),

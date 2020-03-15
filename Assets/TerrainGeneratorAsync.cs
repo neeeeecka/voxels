@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEditor;
 using System;
 using System.Threading;
+using Unity.Mathematics;
 
 public class TerrainGeneratorAsync : MonoBehaviour
 {
@@ -16,7 +17,8 @@ public class TerrainGeneratorAsync : MonoBehaviour
     private int lastWorld;
     public int chunkSize;
     public int blocksGenerated = 0;
-
+    
+    
     List<Vector3> vertices = new List<Vector3>();
     Dictionary<VertexSignature, int> verticesDict = new Dictionary<VertexSignature, int>();
     int vertexCount = 0;
@@ -73,8 +75,8 @@ public class TerrainGeneratorAsync : MonoBehaviour
         {
             data.SetCell(x, y, z, cubeType);
 
-            Async(ChunkUpdate);
-            //ChunkUpdate();
+            //Async(ChunkUpdate);
+            ChunkUpdate();
         }
     }
 
@@ -95,6 +97,7 @@ public class TerrainGeneratorAsync : MonoBehaviour
                 }
             }
         }
+
     }
 
 
@@ -132,39 +135,36 @@ public class TerrainGeneratorAsync : MonoBehaviour
         uvs.Clear();
         triangles.Clear();
 
-        for (int y = 0; y < chunkSize; y++)
+        for(int i = 0; i < 32 * 32 * 32; i++)
         {
-            for (int x = 0; x < chunkSize; x++)
+            int cubeType = data.raw[i];
+            if (cubeType != 0)
             {
-                for (int z = 0; z < chunkSize; z++)
-                {
-                    int cubeType = data.GetCell(x, y, z);
-
-                    if (cubeType != 0)
-                    {
-                        MakeCube(new Vector3(x, y, z), data, cubeType);
-                        blocksGenerated++;
-                    }
-                }
+                int x = i % 32;
+                int y = (i / 32) % 32;
+                int z = i / (32 * 32);
+                MakeCube(x, y, z, data, cubeType);
+                blocksGenerated++;
             }
         }
     }
-    void MakeCube(Vector3 pos, VoxelData data, int cubeType)
+    void MakeCube(int x, int y, int z, VoxelData data, int cubeType)
     {
         for (int i = 0; i < 6; i++)
         {
-            if (data.GetNeighbor((int)pos.x, (int)pos.y, (int)pos.z, (Direction)i) == 0)
+            Direction dir = (Direction)i;
+            if (data.GetNeighbor(x, y, z, dir) == 0)
             {
-                MakeFace((Direction)i, pos, cubeType);
+                MakeFace(dir, x, y, z, cubeType);
             }
         }
     }
-    void MakeFace(Direction dir, Vector3 pos, int cubeType)
+    void MakeFace(Direction dir, int x, int y, int z, int cubeType)
     {
         VertexSignature signature;
         signature.normal = dir;
 
-        Vector3[] faceVertices = CubeMeshData.faceVertices(dir, pos);
+        Vector3[] faceVertices = CubeMeshData.faceVertices((int)dir, x, y, z);
         int[] triangleIndices = new int[4];
         signature.cubeType = cubeType;
 

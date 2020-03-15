@@ -10,39 +10,52 @@ public class VoxelData
     //     { 1, 1, 1 }
     // };
 
-    int[,,] data = new int[,,] {
-        {{ 1, 1, 1, 1, 1, 1 }},
-        {{ 1, 1, 0, 0, 1, 1 }},
-        {{ 1, 1, 0, 0, 1, 1 }},
-        {{ 1, 1, 1, 1, 1, 1 }},
-        {{ 1, 1, 1, 1, 1, 1 }}
-    };
+    //int[][][] data = new int[][][] {
+    //       new int[32]
+    //};
+    public int[] raw = new int[32 * 32 * 32];
+    //int[,,] data = new int[,,] {
+    //    {{ 1, 1, 1, 1, 1, 1 }},
+    //    {{ 1, 1, 0, 0, 1, 1 }},
+    //    {{ 1, 1, 0, 0, 1, 1 }},
+    //    {{ 1, 1, 1, 1, 1, 1 }},
+    //    {{ 1, 1, 1, 1, 1, 1 }}
+    //};
 
     public VoxelData(int x, int y, int z)
     {
-        this.data = new int[x, y, z];
+        //this.data = new int[x, y, z];
     }
 
     public int Width()
     {
-        return data.GetLength(0);
+        //return data.GetLength(0);
+        return 32;
     }
     public int Height()
     {
-        return data.GetLength(1);
+        //return data.GetLength(1);
+        return 32;
+
     }
     public int Depth()
     {
-        return data.GetLength(2);
+        //return data.GetLength(2);
+        return 32;
+
     }
     public int GetCell(int x, int y, int z)
     {
-        return data[x, y, z];
+        //return data[x, y, z];
+        return raw[x + 32 * (y + 32 * z)];
     }
 
     public void SetCell(int x, int y, int z, int val)
     {
-        data[x, y, z] = val;
+        //data[x, y, z] = val;
+        raw[x + 32 * (y + 32 * z)] = val;
+
+        
     }
     public int GetNeighbor(int x, int y, int z, Direction dir)
     {
