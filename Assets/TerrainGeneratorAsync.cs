@@ -222,7 +222,6 @@ public class TerrainGeneratorAsync : MonoBehaviour
     {
         public Vector3 position;
         public Direction normal;
-
         public int cubeType;
 
         public override int GetHashCode()
