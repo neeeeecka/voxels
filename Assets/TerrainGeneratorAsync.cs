@@ -88,7 +88,7 @@ public class TerrainGeneratorAsync : MonoBehaviour
         {
             for (int z = 0; z < chunkSize; z++)
             {
-                int yVal = getNoiseValue(z, x);
+                int yVal = GetNoiseValue(z, x);
 
                 for (int y = yVal - 1; y >= 0; y--)
                 {
@@ -100,9 +100,13 @@ public class TerrainGeneratorAsync : MonoBehaviour
 
     }
 
-
+    bool first = true;
     public void ChunkUpdate() {
-        MakeChunk();
+        //if (first)
+        //{
+            MakeChunk();
+        //    first = false;
+        //}
 
         PrepareMeshData();
 
@@ -135,7 +139,9 @@ public class TerrainGeneratorAsync : MonoBehaviour
         uvs.Clear();
         triangles.Clear();
 
-        for(int i = 0; i < 32 * 32 * 32; i++)
+        int len = 32 * 32 * 32;
+
+        for (int i = 0; i < len; i++)
         {
             int cubeType = data.raw[i];
             if (cubeType != 0)
@@ -143,12 +149,12 @@ public class TerrainGeneratorAsync : MonoBehaviour
                 int x = i % 32;
                 int y = (i / 32) % 32;
                 int z = i / (32 * 32);
-                MakeCube(x, y, z, data, cubeType);
+                MakeCube(x, y, z, cubeType);
                 blocksGenerated++;
             }
         }
     }
-    void MakeCube(int x, int y, int z, VoxelData data, int cubeType)
+    void MakeCube(int x, int y, int z, int cubeType)
     {
         for (int i = 0; i < 6; i++)
         {
@@ -178,13 +184,15 @@ public class TerrainGeneratorAsync : MonoBehaviour
             triangleIndices[i] = vertex;
         }
 
-        triangles.Add(triangleIndices[0]);
-        triangles.Add(triangleIndices[1]);
-        triangles.Add(triangleIndices[2]);
-
-        triangles.Add(triangleIndices[0]);
-        triangles.Add(triangleIndices[2]);
-        triangles.Add(triangleIndices[3]);
+        triangles.AddRange(new int[6] {
+            triangleIndices[0],
+            triangleIndices[1],
+            triangleIndices[2],
+            triangleIndices[0],
+            triangleIndices[2],
+            triangleIndices[3]
+            }
+        );
     }
     void PrepareMeshData()
     {
@@ -192,7 +200,8 @@ public class TerrainGeneratorAsync : MonoBehaviour
         {
             int index = pair.Value;
             vertices.Add(pair.Key.position);
-            normals.Add(CubeMeshData.offsets[(int)pair.Key.normal].ToVector());
+            CubeMeshData.DataCoordinate coord = CubeMeshData.offsets[(int)pair.Key.normal];
+            normals.Add(new Vector3(coord.x, coord.y, coord.z));
 
             Vector3 uv = CubeMeshData.ProjectPositionToUV(pair.Key.position, pair.Key.normal);
             uv.z = pair.Key.cubeType;
@@ -214,7 +223,7 @@ public class TerrainGeneratorAsync : MonoBehaviour
 
         public int cubeType;
     };
-    int getNoiseValue(float x, float y)
+    int GetNoiseValue(float x, float y)
     {
         return Mathf.FloorToInt(Mathf.PerlinNoise(x * scale, y * scale) * maxTerrainHeight);
     }
