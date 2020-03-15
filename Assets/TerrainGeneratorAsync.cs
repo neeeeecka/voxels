@@ -102,19 +102,12 @@ public class TerrainGeneratorAsync : MonoBehaviour
 
     }
 
-    bool first = true;
     public void ChunkUpdate() {
-        //if (first)
-        //{
-            MakeChunk();
-        //    first = false;
-        //}
+        MakeChunk();
+  
 
         PrepareMeshData();
-
-        //Vector3[] vertexArr = vertices.ToArray();
         int[] triArr = triangles.ToArray();
-        //Vector3[] normalsArr = normals.ToArray();
 
         Action toThread = () =>
         {
@@ -126,9 +119,6 @@ public class TerrainGeneratorAsync : MonoBehaviour
             mesh.triangles = triArr;
             mesh.SetUVs(0, new List<Vector3>(_uvs));
 
-            //mesh.normals = normalsArr;
-            //mesh.SetUVs(0, uvs);
-            //mesh.vertices = vertexArr;
 
             meshCollider.sharedMesh = mesh;
             threadFinished = true;
@@ -214,7 +204,6 @@ public class TerrainGeneratorAsync : MonoBehaviour
             Vector3 uv = CubeMeshData.ProjectPositionToUV(pair.Key.position, pair.Key.normal);
             uv.z = pair.Key.cubeType;
 
-
             _vertices[index] = pair.Key.position;
             _normals[index] = new Vector3(coord.x, coord.y, coord.z);
             _uvs[index] = uv;
@@ -261,12 +250,21 @@ public class TerrainGeneratorAsync : MonoBehaviour
 
         return index;
     }
-    //int GetVertexEntry(VertexSignature signature, int vertexIndex)
-    //{
-    //    int count = vertexEntries.Length;
+    int GetVertexEntry(VertexSignature signature)
+    {
+        int count = vertexEntries.Length;
 
-    //    if(vertexEntries[vertexIndex] )
 
-    //    return vertexIndex;
-    //}
+        //if(vertexEntries[vertexIndex].GetHashCode() == signature.GetHashCode())
+        //{
+
+        //}
+
+        //if(doesntExist)
+
+        //vertexEntries[vertexCount] = signature;
+
+        //return vertexIndex;
+        return 0;
+    }
 }
