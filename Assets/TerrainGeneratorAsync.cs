@@ -18,13 +18,15 @@ public class TerrainGeneratorAsync : MonoBehaviour
     public int chunkSize;
     public int blocksGenerated = 0;
     
-    
-    List<Vector3> vertices = new List<Vector3>();
     Dictionary<VertexSignature, int> verticesDict = new Dictionary<VertexSignature, int>();
+    VertexSignature[] vertexEntries = new VertexSignature[10000];
     int vertexCount = 0;
+
     List<int> triangles = new List<int>();
-    List<Vector3> normals = new List<Vector3>();
-    List<Vector3> uvs = new List<Vector3>();
+
+    Vector3[] _normals;
+    Vector3[] _uvs;
+    Vector3[] _vertices;
 
     Mesh mesh;
     VoxelData data;
@@ -48,8 +50,8 @@ public class TerrainGeneratorAsync : MonoBehaviour
         SetWorldData();
         ChunkUpdate();
 
-        AssetDatabase.CreateAsset(mesh, "Assets/Temp/mesh.asset");
-
+        //AssetDatabase.CreateAsset(mesh, "Assets/Temp/mesh.asset");
+        //GetVertexEntry(new VertexSignature(), 12);
     }
 
     List<Action> functionsQueue = new List<Action>();
@@ -110,17 +112,24 @@ public class TerrainGeneratorAsync : MonoBehaviour
 
         PrepareMeshData();
 
-        Vector3[] vertexArr = vertices.ToArray();
+        //Vector3[] vertexArr = vertices.ToArray();
         int[] triArr = triangles.ToArray();
-        Vector3[] normalsArr = normals.ToArray();
+        //Vector3[] normalsArr = normals.ToArray();
 
         Action toThread = () =>
         {
             mesh.Clear();
-            mesh.vertices = vertexArr;
+
+          
+            mesh.vertices = _vertices;
+            mesh.normals = _normals;
             mesh.triangles = triArr;
-            mesh.normals = normalsArr;
-            mesh.SetUVs(0, uvs);
+            mesh.SetUVs(0, new List<Vector3>(_uvs));
+
+            //mesh.normals = normalsArr;
+            //mesh.SetUVs(0, uvs);
+            //mesh.vertices = vertexArr;
+
             meshCollider.sharedMesh = mesh;
             threadFinished = true;
 
@@ -133,10 +142,7 @@ public class TerrainGeneratorAsync : MonoBehaviour
     {
         blocksGenerated = 0;
         vertexCount = 0;
-        vertices.Clear();
-        normals.Clear();
         verticesDict.Clear();
-        uvs.Clear();
         triangles.Clear();
 
         int len = 32 * 32 * 32;
@@ -165,6 +171,7 @@ public class TerrainGeneratorAsync : MonoBehaviour
             }
         }
     }
+
     void MakeFace(Direction dir, int x, int y, int z, int cubeType)
     {
         VertexSignature signature;
@@ -177,8 +184,6 @@ public class TerrainGeneratorAsync : MonoBehaviour
         for (int i = 0; i < 4; i++)
         {
             signature.position = faceVertices[i];
-            Vector3 uv = CubeMeshData.ProjectPositionToUV(signature.position, dir);
-            uv.z = signature.cubeType;
 
             int vertex = GetVertexIndex(signature);
             triangleIndices[i] = vertex;
@@ -198,16 +203,21 @@ public class TerrainGeneratorAsync : MonoBehaviour
     }
     void PrepareMeshData()
     {
+        _vertices = new Vector3[vertexCount];
+        _normals = new Vector3[vertexCount];
+        _uvs = new Vector3[vertexCount];
+
         foreach (var pair in verticesDict)
         {
             int index = pair.Value;
-            vertices.Add(pair.Key.position);
             CubeMeshData.DataCoordinate coord = CubeMeshData.offsets[(int)pair.Key.normal];
-            normals.Add(new Vector3(coord.x, coord.y, coord.z));
-
             Vector3 uv = CubeMeshData.ProjectPositionToUV(pair.Key.position, pair.Key.normal);
             uv.z = pair.Key.cubeType;
-            uvs.Add(uv);
+
+
+            _vertices[index] = pair.Key.position;
+            _normals[index] = new Vector3(coord.x, coord.y, coord.z);
+            _uvs[index] = uv;
         }
     }
 
@@ -251,4 +261,12 @@ public class TerrainGeneratorAsync : MonoBehaviour
 
         return index;
     }
+    //int GetVertexEntry(VertexSignature signature, int vertexIndex)
+    //{
+    //    int count = vertexEntries.Length;
+
+    //    if(vertexEntries[vertexIndex] )
+
+    //    return vertexIndex;
+    //}
 }
