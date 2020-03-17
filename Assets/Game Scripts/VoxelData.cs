@@ -4,58 +4,25 @@ using UnityEngine;
 
 public class VoxelData
 {
-    // int[,] data = new int[,] {
-    //     { 1, 1, 1 },
-    //     { 1, 0, 1 },
-    //     { 1, 1, 1 }
-    // };
 
-    //int[][][] data = new int[][][] {
-    //       new int[32]
-    //};
-    public int[] raw = new int[32 * 32 * 32];
-    //int[,,] data = new int[,,] {
-    //    {{ 1, 1, 1, 1, 1, 1 }},
-    //    {{ 1, 1, 0, 0, 1, 1 }},
-    //    {{ 1, 1, 0, 0, 1, 1 }},
-    //    {{ 1, 1, 1, 1, 1, 1 }},
-    //    {{ 1, 1, 1, 1, 1, 1 }}
-    //};
+    public int[] raw = new int[1 * 1 * 1];
+    public int size = 0;
 
-    public VoxelData(int x, int y, int z)
+    public VoxelData(int size)
     {
-        //this.data = new int[x, y, z];
+        this.size = size;
+        raw = new int[32 * 32 * 32];
     }
 
-    public int Width()
-    {
-        //return data.GetLength(0);
-        return 32;
-    }
-    public int Height()
-    {
-        //return data.GetLength(1);
-        return 32;
 
-    }
-    public int Depth()
-    {
-        //return data.GetLength(2);
-        return 32;
-
-    }
     public int GetCell(int x, int y, int z)
     {
-        //return data[x, y, z];
-        return raw[x + 32 * (y + 32 * z)];
+        return raw[x + size * (y + size * z)];
     }
 
     public void SetCell(int x, int y, int z, int val)
     {
-        //data[x, y, z] = val;
-        raw[x + 32 * (y + 32 * z)] = val;
-
-        
+        raw[x + size * (y + size * z)] = val;
     }
     public int GetNeighbor(int x, int y, int z, Direction dir)
     {
@@ -66,19 +33,15 @@ public class VoxelData
             z + checkOffset.z
         );
 
-        if (neighborCoordinate.x < 0 || neighborCoordinate.x >= Width())
+        if (neighborCoordinate.x < 0 || neighborCoordinate.x >= size)
         {
             return 0;
         }
-        if (neighborCoordinate.y < 0 || neighborCoordinate.y >= Height())
+        if (neighborCoordinate.y < 0 || neighborCoordinate.y >= size)
         {
             return 0;
         }
-        // if (neighborCoordinate.y != 0)
-        // {
-        //     return 0;
-        // }
-        if (neighborCoordinate.z < 0 || neighborCoordinate.z >= Depth())
+        if (neighborCoordinate.z < 0 || neighborCoordinate.z >= size)
         {
             return 0;
         }
