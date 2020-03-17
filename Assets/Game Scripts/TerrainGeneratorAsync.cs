@@ -23,7 +23,7 @@ public class TerrainGeneratorAsync : MonoBehaviour
 
     int[] vertexEntries = new int[5059850];
     List<VertexSignature> vertexEntriesList = new List<VertexSignature>();
-    int vertexCount2 = 0;
+
 
 
     List<int> triangles = new List<int>();
@@ -290,17 +290,25 @@ public class TerrainGeneratorAsync : MonoBehaviour
         return index;
     }
     int firstVertexHash = 0;
+    int vertexCount2 = 1;
 
-    //should return UNIQUE vertex index, and ADD it into array too if it doesnt exist.
     int GetVertexEntry(VertexSignature signature)
     {
         int hash = signature.GetHashCode();
         int vertexIndex = 0;
 
-        
+        if(vertexEntries[hash] == 0)
+        {
+            vertexIndex = vertexCount2;
+            vertexEntries[hash] = vertexIndex;
+            vertexCount2++;
+        }
+        else
+        {
+            vertexIndex = vertexEntries[hash];
+        }
 
-
-        return vertexIndex;
+        return vertexIndex - 1;
     }
 
 }
