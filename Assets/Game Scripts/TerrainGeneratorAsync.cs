@@ -19,13 +19,15 @@ public class TerrainGeneratorAsync : MonoBehaviour
     public int blocksGenerated = 0;
     
     Dictionary<VertexSignature, int> verticesDict = new Dictionary<VertexSignature, int>();
-    uint[] vertexEntries = new uint[5059850];
     int vertexCount = 0;
+
+    int[] vertexEntries = new int[5059850];
+    List<VertexSignature> vertexEntriesList = new List<VertexSignature>();
     int vertexCount2 = 0;
 
 
     List<int> triangles = new List<int>();
-    List<VertexSignature> vertexEntrieslist = new List<VertexSignature>();
+   
 
     Vector3[] _normals;
     Vector3[] _uvs;
@@ -137,6 +139,7 @@ public class TerrainGeneratorAsync : MonoBehaviour
         verticesDict.Clear();
         triangles.Clear();
 
+
         int len = chunkSize * chunkSize * chunkSize;
 
         for (int i = 0; i < len; i++)
@@ -199,36 +202,38 @@ public class TerrainGeneratorAsync : MonoBehaviour
     {
         //_vertices = vertices.ToArray();
 
-        Debug.Log(vertexEntrieslist.Count);
-        Debug.Log(vertexCount);
+        Debug.Log("Vertex array entries: " + vertexEntriesList.Count);
+        Debug.Log(vertexCount2);
+        //Debug.Log("Vertex dictionary entries: " + vertexCount);
+
 
         _vertices = new Vector3[vertexCount];
         _normals = new Vector3[vertexCount];
         _uvs = new Vector3[vertexCount];
 
-        //foreach (var pair in verticesDict)
-        //{
-        //    int index = pair.Value;
-        //    CubeMeshData.DataCoordinate coord = CubeMeshData.offsets[(int)pair.Key.normal];
-        //    Vector3 uv = CubeMeshData.ProjectPositionToUV(pair.Key.position, pair.Key.normal);
-        //    uv.z = pair.Key.cubeType;
-
-        //    _vertices[index] = pair.Key.position;
-        //    _normals[index] = new Vector3(coord.x, coord.y, coord.z);
-        //    _uvs[index] = uv;
-        //}
-
-        for (int i = 0; i < vertexCount2; i++)
+        foreach (var pair in verticesDict)
         {
-            VertexSignature signature = vertexEntrieslist[i];
-            CubeMeshData.DataCoordinate coord = CubeMeshData.offsets[(int)signature.normal];
-            Vector3 uv = CubeMeshData.ProjectPositionToUV(signature.position, signature.normal);
-            uv.z = signature.cubeType;
+            int index = pair.Value;
+            CubeMeshData.DataCoordinate coord = CubeMeshData.offsets[(int)pair.Key.normal];
+            Vector3 uv = CubeMeshData.ProjectPositionToUV(pair.Key.position, pair.Key.normal);
+            uv.z = pair.Key.cubeType;
 
-            _vertices[i] = signature.position;
-            _normals[i] = new Vector3(coord.x, coord.y, coord.z);
-            _uvs[i] = uv;
+            _vertices[index] = pair.Key.position;
+            _normals[index] = new Vector3(coord.x, coord.y, coord.z);
+            _uvs[index] = uv;
         }
+
+        //for (int i = 0; i < vertexCount2; i++)
+        //{
+        //    VertexSignature signature = vertexEntriesList[i];
+        //    CubeMeshData.DataCoordinate coord = CubeMeshData.offsets[(int)signature.normal];
+        //    Vector3 uv = CubeMeshData.ProjectPositionToUV(signature.position, signature.normal);
+        //    uv.z = signature.cubeType;
+
+        //    _vertices[i] = signature.position;
+        //    _normals[i] = new Vector3(coord.x, coord.y, coord.z);
+        //    _uvs[i] = uv;
+        //}
     }
 
 
@@ -238,21 +243,18 @@ public class TerrainGeneratorAsync : MonoBehaviour
         threadFinished = false;
     }
 
-    private static int MakeHashCode(ref VertexSignature sign)
-    {
-        int n = 0;
-        n = (int)sign.position.x +
-            (int)sign.position.y * chunkSize +
-            (int)sign.position.z * chunkSize * chunkSize +
-            (int)sign.normal * chunkSize * chunkSize * chunkSize +
-            sign.cubeType * chunkSize * chunkSize * chunkSize * chunkSize
-            ;
-        return n;
-    }
-    //private static VertexSignature FromHashCode(ref int sign)
+    //private int MakeHashCode(ref VertexSignature sign)
     //{
-    //    int x = sign
+    //    int n = 0;
+    //    n = (int)sign.position.x +
+    //        (int)sign.position.y * chunkSize +
+    //        (int)sign.position.z * chunkSize * chunkSize +
+    //        (int)sign.normal * chunkSize * chunkSize * chunkSize +
+    //        sign.cubeType * chunkSize * chunkSize * chunkSize * chunkSize
+    //        ;
+    //    return n;
     //}
+ 
 
     struct VertexSignature
     {
@@ -287,35 +289,18 @@ public class TerrainGeneratorAsync : MonoBehaviour
 
         return index;
     }
+    int firstVertexHash = 0;
+
+    //should return UNIQUE vertex index, and ADD it into array too if it doesnt exist.
     int GetVertexEntry(VertexSignature signature)
     {
-        int hash = MakeHashCode(ref signature);
-      
-        //if its first vertex in mesh, create it and return vertexIndex 0.
-        if (vertexCount == 0)
-        {
-            vertexEntries[hash] = (uint)vertexCount2;
-            vertexCount2++;
+        int hash = signature.GetHashCode();
+        int vertexIndex = 0;
 
-            vertexEntrieslist.Add(signature);
+        
 
-            return vertexCount2;
-        }
-        //if its not first vertex in mesh, but its 0(not exists), create it and return index++
-        if (vertexEntries[hash] == 0)
-        {
-            vertexCount2++;
-            vertexEntries[hash] = (uint)vertexCount2;
 
-            vertexEntrieslist.Add(signature);
-
-            return vertexCount2;
-        }
-        //if it already exists, return same without incrementing.
-        else
-        {
-            return (int)vertexEntries[hash];
-        }
+        return vertexIndex;
     }
 
 }
