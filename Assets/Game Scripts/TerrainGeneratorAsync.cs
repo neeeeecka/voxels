@@ -83,8 +83,8 @@ public class TerrainGeneratorAsync : MonoBehaviour
         {
             data.SetCell(x, y, z, cubeType);
 
-            //Async(ChunkUpdate);
-            ChunkUpdate();
+            Async(ChunkUpdate);
+            //ChunkUpdate();
         }
     }
 

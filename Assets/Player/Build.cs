@@ -11,36 +11,60 @@ public class Build : MonoBehaviour
     public float hitDistance = 4;
 
     private float calcHitDistance = 0;
+
+    public float blocksPerSecond = 3;
+
+    public bool canPut = false;
+
+    public float minBuildDist = 1;
     // Start is called before the first frame update
     void Start()
     {
         calcHitDistance = Mathf.Sqrt(Mathf.Pow(hitDistance, 2) + 4);
     }
 
+    IEnumerator bpsTimer()
+    {
+        canPut = false;
+        yield return new WaitForSeconds(1 / blocksPerSecond);
+        canPut = true;
+    }
+
     // Update is called once per frame
     void Update()
     {
-        Ray ray = new Ray(controller.head.position, controller.head.forward);
-        Debug.DrawRay(controller.head.position, controller.head.forward * calcHitDistance, Color.blue);
-        RaycastHit hit;
-        if (Physics.Raycast(ray, out hit, calcHitDistance, hitLayer))
+        if (canPut)
         {
-            Vector3 hitDir = hit.normal;
-            Vector3 worldPos = hit.point;
-
-            worldPos -= hitDir / 2;
-
-            int x = Mathf.FloorToInt(worldPos.x);
-            int y = Mathf.FloorToInt(worldPos.y);
-            int z = Mathf.FloorToInt(worldPos.z);
-
-            if (Input.GetMouseButton(0))
+            Ray ray = new Ray(controller.head.position, controller.head.forward);
+            Debug.DrawRay(controller.head.position, controller.head.forward * calcHitDistance, Color.blue);
+            RaycastHit hit;
+            if (Physics.Raycast(ray, out hit, calcHitDistance, hitLayer))
             {
-                terrain.EditWorld(x, y, z, 0);
-            }
-            if (Input.GetMouseButton(1))
-            {
-                terrain.EditWorld(x + (int)hitDir.x, y + (int)hitDir.y, z + (int)hitDir.z, 1);
+                Vector3 hitDir = hit.normal;
+                Vector3 worldPos = hit.point;
+
+
+                worldPos -= hitDir / 2;
+
+                int x = Mathf.FloorToInt(worldPos.x);
+                int y = Mathf.FloorToInt(worldPos.y);
+                int z = Mathf.FloorToInt(worldPos.z);
+
+                if (Input.GetMouseButton(0))
+                {
+                    terrain.EditWorld(x, y, z, 0);
+                    StartCoroutine(bpsTimer());
+                }
+                if ((transform.position - (worldPos + hitDir)).magnitude >= minBuildDist)
+                {
+                    if (Input.GetMouseButton(1))
+                    {
+                        terrain.EditWorld(x + (int)hitDir.x, y + (int)hitDir.y, z + (int)hitDir.z, 1);
+                        StartCoroutine(bpsTimer());
+
+                    }
+                }
+
             }
         }
     }
