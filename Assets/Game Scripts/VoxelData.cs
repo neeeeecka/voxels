@@ -11,7 +11,7 @@ public class VoxelData
     public VoxelData(int size)
     {
         this.size = size;
-        raw = new int[32 * 32 * 32];
+        raw = new int[size * size * size];
     }
 
 

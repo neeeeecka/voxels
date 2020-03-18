@@ -21,7 +21,7 @@ public class TerrainGeneratorAsync : MonoBehaviour
     Dictionary<VertexSignature, int> verticesDict = new Dictionary<VertexSignature, int>();
     int vertexCount = 0;
 
-    int[] vertexEntries = new int[5059850];
+    int[] vertexEntries = new int[1];
     List<VertexSignature> vertexEntriesList = new List<VertexSignature>();
 
 
@@ -307,7 +307,7 @@ public class TerrainGeneratorAsync : MonoBehaviour
     {
         int hash = signature.GetHashCode();
         int vertexIndex = -1;
-
+        Debug.Log(hash);
         if(vertexEntries[hash] == 0)
         {
             if(vertexCount2 == 0)
