@@ -55,6 +55,8 @@ public class TerrainGeneratorAsync : MonoBehaviour
         SetWorldData();
         ChunkUpdate();
 
+
+
         //AssetDatabase.CreateAsset(mesh, "Assets/Temp/mesh.asset");
     }
 
@@ -181,7 +183,7 @@ public class TerrainGeneratorAsync : MonoBehaviour
             signature.position = faceVertices[i];
 
             int vertex = GetVertexIndex(signature);
-            int vertex2 = GetVertexEntry(signature);
+            //int vertex2 = GetVertexEntry(signature);
 
             triangleIndices[i] = vertex;
         }
@@ -202,8 +204,8 @@ public class TerrainGeneratorAsync : MonoBehaviour
     {
         //_vertices = vertices.ToArray();
 
-        Debug.Log("Vertex array entries: " + vertexEntriesList.Count);
-        Debug.Log(vertexCount2);
+        //Debug.Log("Vertex array entries: " + vertexEntriesList.Count);
+        //Debug.Log(vertexCount2);
         //Debug.Log("Vertex dictionary entries: " + vertexCount);
 
 
@@ -264,14 +266,23 @@ public class TerrainGeneratorAsync : MonoBehaviour
 
         public override int GetHashCode()
         {
-            int n = 0;
-            n = (int)position.x +
-                (int)position.y * chunkSize +
-                (int)position.z * chunkSize * chunkSize +
-                (int)normal * chunkSize * chunkSize * chunkSize +
-                cubeType * chunkSize * chunkSize * chunkSize * chunkSize
-                ;
-            return n;
+            int x = (int)(position.x * 2);
+            int y = (int)(position.y * 2);
+            int z = (int)(position.z * 2);
+
+            int n = (int)normal;
+            int c = cubeType;
+
+            int p = (((x + y * chunkSize * 2) * chunkSize * 2 + z) * 6 + n) * 4 + c;
+            return p;
+        }
+        public override bool Equals(object obj)
+        {
+            if(obj == null)
+            {
+                return false;
+            }
+            return obj.GetHashCode() == GetHashCode();
         }
     };
     int GetNoiseValue(float x, float y)
@@ -290,25 +301,42 @@ public class TerrainGeneratorAsync : MonoBehaviour
         return index;
     }
     int firstVertexHash = 0;
-    int vertexCount2 = 1;
+    int vertexCount2 = 0;
 
     int GetVertexEntry(VertexSignature signature)
     {
         int hash = signature.GetHashCode();
-        int vertexIndex = 0;
+        int vertexIndex = -1;
 
         if(vertexEntries[hash] == 0)
         {
-            vertexIndex = vertexCount2;
-            vertexEntries[hash] = vertexIndex;
-            vertexCount2++;
+            if(vertexCount2 == 0)
+            {
+                vertexIndex = vertexCount2;
+                vertexEntries[hash] = vertexIndex;
+                firstVertexHash = hash;
+                vertexCount2++;
+            }
+            else 
+            {
+                if (hash == firstVertexHash)
+                {
+                    vertexIndex = 0;
+                }
+                else
+                {
+                    vertexIndex = vertexCount2;
+                    vertexEntries[hash] = vertexIndex;
+                    vertexCount2++;
+                }
+            }
         }
         else
         {
             vertexIndex = vertexEntries[hash];
         }
 
-        return vertexIndex - 1;
+        return vertexIndex;
     }
 
 }
