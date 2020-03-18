@@ -55,7 +55,7 @@ public class TerrainGeneratorAsync : MonoBehaviour
         SetWorldData();
         ChunkUpdate();
 
-        AssetDatabase.CreateAsset(mesh, "Assets/Temp/mesh.asset");
+        //AssetDatabase.CreateAsset(mesh, "Assets/Temp/mesh.asset");
     }
 
     List<Action> functionsQueue = new List<Action>();
@@ -69,8 +69,8 @@ public class TerrainGeneratorAsync : MonoBehaviour
             lastHeight = maxTerrainHeight;
             if (threadFinished)
             {
-                SetWorldData();
-                Async(ChunkUpdate);
+                //SetWorldData();
+                //Async(ChunkUpdate);
             }
         }
         while(functionsQueue.Count > 0){
