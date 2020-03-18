@@ -55,9 +55,7 @@ public class TerrainGeneratorAsync : MonoBehaviour
         SetWorldData();
         ChunkUpdate();
 
-
-
-        //AssetDatabase.CreateAsset(mesh, "Assets/Temp/mesh.asset");
+        AssetDatabase.CreateAsset(mesh, "Assets/Temp/mesh.asset");
     }
 
     List<Action> functionsQueue = new List<Action>();
