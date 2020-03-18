@@ -8,6 +8,8 @@ public class Build : MonoBehaviour
     public Controller controller;
     public LayerMask hitLayer;
 
+    public Transform eyes;
+
     public float hitDistance = 4;
 
     private float calcHitDistance = 0;
@@ -35,8 +37,8 @@ public class Build : MonoBehaviour
     {
         if (canPut)
         {
-            Ray ray = new Ray(controller.head.position, controller.head.forward);
-            Debug.DrawRay(controller.head.position, controller.head.forward * calcHitDistance, Color.blue);
+            Ray ray = new Ray(eyes.position, eyes.forward);
+            Debug.DrawRay(eyes.position, eyes.forward * calcHitDistance, Color.blue);
             RaycastHit hit;
             if (Physics.Raycast(ray, out hit, calcHitDistance, hitLayer))
             {

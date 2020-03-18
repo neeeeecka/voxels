@@ -33,7 +33,7 @@ AnimationClip:
       m_PostInfinity: 2
       m_RotationOrder: 4
     attribute: field of view
-    path: Head/Camera
+    path: headJoint/headModel/camHolder/Camera
     classID: 20
     script: {fileID: 0}
   m_PPtrCurves: []
@@ -45,7 +45,7 @@ AnimationClip:
   m_ClipBindingConstant:
     genericBindings:
     - serializedVersion: 2
-      path: 2617032241
+      path: 1626239993
       attribute: 3138646591
       script: {fileID: 0}
       typeID: 20
@@ -89,7 +89,7 @@ AnimationClip:
       m_PostInfinity: 2
       m_RotationOrder: 4
     attribute: field of view
-    path: Head/Camera
+    path: headJoint/headModel/camHolder/Camera
     classID: 20
     script: {fileID: 0}
   m_EulerEditorCurves: []
