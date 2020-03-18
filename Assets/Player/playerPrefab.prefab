@@ -142,7 +142,7 @@ Camera:
   m_Depth: 1
   m_CullingMask:
     serializedVersion: 2
-    m_Bits: 2048
+    m_Bits: 4096
   m_RenderingPath: -1
   m_TargetTexture: {fileID: 0}
   m_TargetDisplay: 0
@@ -321,7 +321,7 @@ MonoBehaviour:
     m_Bits: 512
   eyes: {fileID: 526462511362527618}
   hitDistance: 4
-  blocksPerSecond: 8
+  blocksPerSecond: 5.8
   canPut: 1
   minBuildDist: 1
 --- !u!1 &526462510800962679
@@ -366,7 +366,7 @@ GameObject:
   - component: {fileID: 526462511220075991}
   - component: {fileID: 526462511220075989}
   - component: {fileID: 526462511220075990}
-  m_Layer: 11
+  m_Layer: 12
   m_Name: fpsHand
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -500,7 +500,7 @@ Camera:
   m_Depth: 0
   m_CullingMask:
     serializedVersion: 2
-    m_Bits: 5664
+    m_Bits: 2560
   m_RenderingPath: -1
   m_TargetTexture: {fileID: 0}
   m_TargetDisplay: 0

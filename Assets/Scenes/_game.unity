@@ -371,9 +371,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a8fc8f330e66df54ba05456dfb4e16eb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  scale: 0.05
-  maxTerrainHeight: 10
-  blocksGenerated: 0
+  scale: 0.018
+  maxTerrainHeight: 12
+  blocksGenerated: 4822
   threadFinished: 1
 --- !u!1 &1368923113
 GameObject:
@@ -714,6 +714,11 @@ PrefabInstance:
       propertyPath: terrain
       value: 
       objectReference: {fileID: 992339434}
+    - target: {fileID: 526462510630174557, guid: 2d3d5c5ecc98a244baaf37ac25ea895c,
+        type: 3}
+      propertyPath: blocksPerSecond
+      value: 5.5
+      objectReference: {fileID: 0}
     - target: {fileID: 526462510630174558, guid: 2d3d5c5ecc98a244baaf37ac25ea895c,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -722,7 +727,7 @@ PrefabInstance:
     - target: {fileID: 526462510630174558, guid: 2d3d5c5ecc98a244baaf37ac25ea895c,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: 5.61
+      value: 7.76
       objectReference: {fileID: 0}
     - target: {fileID: 526462510630174558, guid: 2d3d5c5ecc98a244baaf37ac25ea895c,
         type: 3}

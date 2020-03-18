@@ -112,7 +112,12 @@ public class Controller : MonoBehaviour
             transform.rotation = Quaternion.Euler(0, currentRotation.y + mouseX * rotationSpeed, 0);
 
             Vector3 currentHeadRotation = head.localRotation.eulerAngles;
-            head.localRotation = Quaternion.Euler(currentHeadRotation.x - mouseY * rotationSpeed, 0, 0);
+            float newAngle = currentHeadRotation.x - mouseY * rotationSpeed;
+            if (newAngle > 180  && newAngle < 270)
+             newAngle = 270;
+            else if (newAngle < 180 && newAngle > 90)
+             newAngle = 90;
+            head.localRotation = Quaternion.Euler(newAngle, 0, 0);
         }
 
         Ray ray = new Ray(transform.position, Vector3.down);

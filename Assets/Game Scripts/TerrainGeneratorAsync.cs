@@ -67,6 +67,11 @@ public class TerrainGeneratorAsync : MonoBehaviour
         {
             lastScale = scale;
             lastHeight = maxTerrainHeight;
+            if (threadFinished)
+            {
+                SetWorldData();
+                Async(ChunkUpdate);
+            }
         }
         while(functionsQueue.Count > 0){
             Action func = functionsQueue[0];
