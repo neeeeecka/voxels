@@ -21,22 +21,18 @@ public class TerrainGeneratorAsync : MonoBehaviour
     Dictionary<VertexSignature, int> verticesDict = new Dictionary<VertexSignature, int>();
     int vertexCount = 0;
 
-    int[] vertexEntries = new int[1];
-    List<VertexSignature> vertexEntriesList = new List<VertexSignature>();
-
-
-
     List<int> triangles = new List<int>();
    
-
     Vector3[] _normals;
     Vector3[] _uvs;
     Vector3[] _vertices;
 
     Mesh mesh;
-    VoxelData data;
     private MeshFilter meshFilter;
     private MeshCollider meshCollider;
+
+    public List<ChunkVoxelData> chunks;
+    ChunkVoxelData data;
 
     public bool threadFinished = true;
 
@@ -52,10 +48,10 @@ public class TerrainGeneratorAsync : MonoBehaviour
         meshFilter.mesh = mesh;
         mesh.MarkDynamic();
 
-        SetWorldData();
+        InitChunkData();
         ChunkUpdate();
 
-        AssetDatabase.CreateAsset(mesh, "Assets/Temp/mesh.asset");
+        //AssetDatabase.CreateAsset(mesh, "Assets/Temp/mesh.asset");
     }
 
     List<Action> functionsQueue = new List<Action>();
@@ -91,9 +87,9 @@ public class TerrainGeneratorAsync : MonoBehaviour
         }
     }
 
-    void SetWorldData()
+    void InitChunkData()
     {
-        data = new VoxelData(chunkSize);
+        data = new ChunkVoxelData(chunkSize);
 
         for (int x = 0; x < chunkSize; x++)
         {
@@ -113,25 +109,20 @@ public class TerrainGeneratorAsync : MonoBehaviour
 
     public void ChunkUpdate() {
         MakeChunk();
-  
-
         PrepareMeshData();
+
         int[] triArr = triangles.ToArray();
 
         Action toThread = () =>
         {
             mesh.Clear();
-
-          
             mesh.vertices = _vertices;
             mesh.normals = _normals;
             mesh.triangles = triArr;
             mesh.SetUVs(0, new List<Vector3>(_uvs));
 
-
             meshCollider.sharedMesh = mesh;
             threadFinished = true;
-
         };
 
         functionsQueue.Add(toThread);
@@ -143,7 +134,6 @@ public class TerrainGeneratorAsync : MonoBehaviour
         vertexCount = 0;
         verticesDict.Clear();
         triangles.Clear();
-
 
         int len = chunkSize * chunkSize * chunkSize;
 
@@ -171,7 +161,6 @@ public class TerrainGeneratorAsync : MonoBehaviour
             }
         }
     }
-
     void MakeFace(Direction dir, int x, int y, int z, int cubeType)
     {
         VertexSignature signature;
@@ -240,27 +229,11 @@ public class TerrainGeneratorAsync : MonoBehaviour
         //    _uvs[i] = uv;
         //}
     }
-
-
     public void Async(Action func) {
         Thread thread = new Thread(new ThreadStart(func));
         thread.Start();
         threadFinished = false;
     }
-
-    //private int MakeHashCode(ref VertexSignature sign)
-    //{
-    //    int n = 0;
-    //    n = (int)sign.position.x +
-    //        (int)sign.position.y * chunkSize +
-    //        (int)sign.position.z * chunkSize * chunkSize +
-    //        (int)sign.normal * chunkSize * chunkSize * chunkSize +
-    //        sign.cubeType * chunkSize * chunkSize * chunkSize * chunkSize
-    //        ;
-    //    return n;
-    //}
- 
-
     struct VertexSignature
     {
         public Vector3 position;
@@ -303,43 +276,6 @@ public class TerrainGeneratorAsync : MonoBehaviour
 
         return index;
     }
-    int firstVertexHash = 0;
-    int vertexCount2 = 0;
 
-    int GetVertexEntry(VertexSignature signature)
-    {
-        int hash = signature.GetHashCode();
-        int vertexIndex = -1;
-        Debug.Log(hash);
-        if(vertexEntries[hash] == 0)
-        {
-            if(vertexCount2 == 0)
-            {
-                vertexIndex = vertexCount2;
-                vertexEntries[hash] = vertexIndex;
-                firstVertexHash = hash;
-                vertexCount2++;
-            }
-            else 
-            {
-                if (hash == firstVertexHash)
-                {
-                    vertexIndex = 0;
-                }
-                else
-                {
-                    vertexIndex = vertexCount2;
-                    vertexEntries[hash] = vertexIndex;
-                    vertexCount2++;
-                }
-            }
-        }
-        else
-        {
-            vertexIndex = vertexEntries[hash];
-        }
-
-        return vertexIndex;
-    }
 
 }

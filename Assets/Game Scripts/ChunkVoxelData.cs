@@ -2,13 +2,13 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class VoxelData
+public class ChunkVoxelData : MonoBehaviour
 {
 
     public int[] raw = new int[1 * 1 * 1];
     public int size = 0;
 
-    public VoxelData(int size)
+    public ChunkVoxelData(int size)
     {
         this.size = size;
         raw = new int[size * size * size];
