@@ -81,7 +81,6 @@ public class ChunkVoxelData : MonoBehaviour
 
             meshCollider.sharedMesh = mesh;
             threadFinished = true;
-            Debug.Log("made");
         };
 
         functionsQueue.Add(toMainThread);

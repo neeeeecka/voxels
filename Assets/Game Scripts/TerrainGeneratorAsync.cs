@@ -23,25 +23,11 @@ public class TerrainGeneratorAsync : MonoBehaviour
 
     public GameObject chunkPrefab;
 
-
-    IEnumerator chunkGen()
-    {
-        for (int x = 0; x < 10; x++)
-        {
-            for (int z = 0; z < 10; z++)
-            {
-                yield return new WaitForSeconds(0.1f);
-                MakeChunkAt(x, z);
-            }
-        }
-
-    }
-
     void Start()
     {
-        for (int x = 0; x < 10; x++)
+        for (int x = 0; x < 15; x++)
         {
-            for (int z = 0; z < 10; z++)
+            for (int z = 0; z < 15; z++)
             {
                 chunksQueue.Add(MakeChunkAt(x, z));
             }
@@ -81,6 +67,7 @@ public class TerrainGeneratorAsync : MonoBehaviour
         Action toMainThread = () =>
         {
             threadFinished = true;
+            chunksQueue.RemoveAt(0);
             MakeNextChunk();
         };
         functionsQueue.Add(toMainThread);
@@ -88,7 +75,6 @@ public class TerrainGeneratorAsync : MonoBehaviour
 
     private void MakeNextChunk()
     {
-        chunksQueue.RemoveAt(0);
         Async(RegenerateSyncWrapper, chunksQueue[0]);
     }
 
@@ -100,10 +86,6 @@ public class TerrainGeneratorAsync : MonoBehaviour
         int chunkPosX = x / 32;
         int chunkPosZ = z / 32;
 
-        //Debug.Log("raw coord: " + new Vector2(x, z));
-
-        //Debug.Log("chunk coord: " + new Vector2(chunkX, chunkZ));
-
         ChunkVoxelData data = null;
         chunks.TryGetValue(new Vector2(chunkPosX, chunkPosZ), out data);
         if (data)
@@ -113,7 +95,6 @@ public class TerrainGeneratorAsync : MonoBehaviour
                 data.SetCell(chunkX, y, chunkZ, cubeType);
                 data.RegenerateAsync();
             }
- 
         }
         else
         {
