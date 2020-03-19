@@ -321,7 +321,7 @@ MonoBehaviour:
     m_Bits: 512
   eyes: {fileID: 526462511362527618}
   hitDistance: 4
-  blocksPerSecond: 5.8
+  blocksPerSecond: 7
   canPut: 1
   minBuildDist: 1
 --- !u!1 &526462510800962679
