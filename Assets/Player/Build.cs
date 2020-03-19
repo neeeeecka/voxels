@@ -32,6 +32,8 @@ public class Build : MonoBehaviour
         canPut = true;
     }
 
+    Vector3 half = new Vector3(0.5f, 0.5f, 0.5f);
+
     // Update is called once per frame
     void Update()
     {
@@ -52,12 +54,14 @@ public class Build : MonoBehaviour
                 int y = Mathf.FloorToInt(worldPos.y);
                 int z = Mathf.FloorToInt(worldPos.z);
 
+                Vector3 floored = new Vector3(x, y, z);
+                
                 if (Input.GetMouseButton(0))
                 {
                     terrain.EditWorld(x, y, z, 0);
                     StartCoroutine(bpsTimer());
                 }
-                if ((transform.position - (worldPos + hitDir)).magnitude >= minBuildDist)
+                if ((transform.position - half - (floored + hitDir)).magnitude >= minBuildDist)
                 {
                     if (Input.GetMouseButton(1))
                     {

@@ -729,6 +729,11 @@ PrefabInstance:
       propertyPath: blocksPerSecond
       value: 5.5
       objectReference: {fileID: 0}
+    - target: {fileID: 526462510630174557, guid: 2d3d5c5ecc98a244baaf37ac25ea895c,
+        type: 3}
+      propertyPath: minBuildDist
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 526462510630174558, guid: 2d3d5c5ecc98a244baaf37ac25ea895c,
         type: 3}
       propertyPath: m_LocalPosition.x
