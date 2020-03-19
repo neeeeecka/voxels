@@ -301,7 +301,7 @@ MonoBehaviour:
     type: 3}
   spawnPoints:
   - {fileID: 2010261375}
-  terrainScript: {fileID: 992339434}
+  terrain: {fileID: 992339434}
 --- !u!4 &992339430
 Transform:
   m_ObjectHideFlags: 0
@@ -395,6 +395,7 @@ MonoBehaviour:
   threadFinished: 1
   chunkPrefab: {fileID: 8997205017320476372, guid: 763f2b05658355d4f9d15d0211432d27,
     type: 3}
+  player: {fileID: 0}
 --- !u!1 &1368923113
 GameObject:
   m_ObjectHideFlags: 0

@@ -11,13 +11,12 @@ public class TerrainGeneratorAsync : MonoBehaviour
 
     [Range(0, 0.1f)]
     public float scale = 0.01f;
-    [Range(1, 32)]
+
 
     public int maxTerrainHeight = 10;
     public int blocksGenerated = 0;
 
     public Dictionary<Vector2, ChunkVoxelData> chunks = new Dictionary<Vector2, ChunkVoxelData>();
-    //public ChunkVoxelData data;
 
     public bool threadFinished = true;
 
@@ -25,19 +24,23 @@ public class TerrainGeneratorAsync : MonoBehaviour
 
     void Start()
     {
-        for (int x = 0; x < 15; x++)
+        for (int x = 0; x < 10; x++)
         {
-            for (int z = 0; z < 15; z++)
+            for (int z = 0; z < 10; z++)
             {
                 chunksQueue.Add(MakeChunkAt(x, z));
             }
         }
         MakeNextChunk();
+        //chunksQueue.Add(MakeChunkAt(0, 0));
+        //MakeNextChunk();
     }
 
     List<Action> functionsQueue = new List<Action>();
     List<ChunkVoxelData> chunksQueue = new List<ChunkVoxelData>();
 
+    public Transform player;
+    
 
     private void Update()
     {
@@ -52,7 +55,7 @@ public class TerrainGeneratorAsync : MonoBehaviour
     public ChunkVoxelData MakeChunkAt(int x, int z)
     {
         
-        GameObject chunk = Instantiate(chunkPrefab, new Vector3(x * 32 + 0.5f, 0.5f, z * 32 + 0.5f), Quaternion.Euler(0, 0, 0), transform);
+        GameObject chunk = Instantiate(chunkPrefab, new Vector3(x * ChunkVoxelData.size + 0.5f, 0.5f, z * ChunkVoxelData.size + 0.5f), Quaternion.Euler(0, 0, 0), transform);
         chunk.name = "c-" + x + "." + z;
         ChunkVoxelData data = chunk.GetComponent<ChunkVoxelData>();
         chunks.Add(new Vector2(x, z), data);
@@ -75,16 +78,20 @@ public class TerrainGeneratorAsync : MonoBehaviour
 
     private void MakeNextChunk()
     {
-        Async(RegenerateSyncWrapper, chunksQueue[0]);
+        if (chunksQueue.Count >= 1)
+        {
+            Async(RegenerateSyncWrapper, chunksQueue[0]);
+            //RegenerateSyncWrapper(chunksQueue[0]);
+        }
     }
 
     public void EditWorld(int x, int y, int z, int cubeType)
     {
-        int chunkX = x % 32;
-        int chunkZ = z % 32;
+        int chunkX = x % ChunkVoxelData.size;
+        int chunkZ = z % ChunkVoxelData.size;
 
-        int chunkPosX = x / 32;
-        int chunkPosZ = z / 32;
+        int chunkPosX = x / ChunkVoxelData.size;
+        int chunkPosZ = z / ChunkVoxelData.size;
 
         ChunkVoxelData data = null;
         chunks.TryGetValue(new Vector2(chunkPosX, chunkPosZ), out data);
@@ -104,13 +111,13 @@ public class TerrainGeneratorAsync : MonoBehaviour
 
     public int[] InitChunkData(int chunkPosX, int chunkPosZ)
     {
-        int size = 32;
+        int size = ChunkVoxelData.size;
         int[] raw = new int[size * size * size];
         for (int x = 0; x < size; x++)
         {
             for (int z = 0; z < size; z++)
             {
-                int yVal = GetNoiseValue(chunkPosZ * 32 + z, chunkPosX * 32 + x);
+                int yVal = GetNoiseValue(chunkPosZ * ChunkVoxelData.size + z, chunkPosX * ChunkVoxelData.size + x);
 
                 for (int y = yVal - 1; y >= 0; y--)
                 {

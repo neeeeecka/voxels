@@ -19,7 +19,7 @@ public class Build : MonoBehaviour
     public bool canPut = false;
 
     public float minBuildDist = 1;
-    // Start is called before the first frame update
+
     void Start()
     {
         calcHitDistance = Mathf.Sqrt(Mathf.Pow(hitDistance, 2) + 4);
