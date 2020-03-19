@@ -51,11 +51,12 @@ public class Controller : MonoBehaviour
         if (Mathf.Abs(vAxis) + Mathf.Abs(hAxis) != 0)
         {
             animator.SetBool("isWalking", true);
+            isWalking = true;
         }
         else
         {
             animator.SetBool("isWalking", false);
-
+            isWalking = false;
         }
 
         if(Input.GetMouseButton(0) || Input.GetMouseButton(1))
@@ -74,11 +75,9 @@ public class Controller : MonoBehaviour
 
             if (Input.GetKeyDown(KeyCode.W))
             {
-                isWalking = true;
-
                 if (wasFirst)
                 {
-                    LiveRunMultiplier = 1.5f;
+                    LiveRunMultiplier = 1.3f;
                     isRunning = true;
                     animator.SetBool("isRunning", true);
 
@@ -94,7 +93,6 @@ public class Controller : MonoBehaviour
                 LiveRunMultiplier = 1;
                 isRunning = false;
                 animator.SetBool("isRunning", false);
-                isWalking = false;
             }
         }
 
