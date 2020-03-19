@@ -39,12 +39,19 @@ public class TerrainGeneratorAsync : MonoBehaviour
 
     void Start()
     {
-        StartCoroutine(chunkGen());
-     
-        
+        for (int x = 0; x < 10; x++)
+        {
+            for (int z = 0; z < 10; z++)
+            {
+                chunksQueue.Add(MakeChunkAt(x, z));
+            }
+        }
+        MakeNextChunk();
     }
 
     List<Action> functionsQueue = new List<Action>();
+    List<ChunkVoxelData> chunksQueue = new List<ChunkVoxelData>();
+
 
     private void Update()
     {
@@ -56,7 +63,7 @@ public class TerrainGeneratorAsync : MonoBehaviour
         }
     }
 
-    public void MakeChunkAt(int x, int z)
+    public ChunkVoxelData MakeChunkAt(int x, int z)
     {
         
         GameObject chunk = Instantiate(chunkPrefab, new Vector3(x * 32 + 0.5f, 0.5f, z * 32 + 0.5f), Quaternion.Euler(0, 0, 0), transform);
@@ -65,10 +72,7 @@ public class TerrainGeneratorAsync : MonoBehaviour
         chunks.Add(new Vector2(x, z), data);
 
         data.SetRaw(InitChunkData(x, z));
-        if (threadFinished)
-        {
-            Async(RegenerateSyncWrapper, data);
-        }
+        return data;
     }
 
     private void RegenerateSyncWrapper(ChunkVoxelData data)
@@ -77,8 +81,15 @@ public class TerrainGeneratorAsync : MonoBehaviour
         Action toMainThread = () =>
         {
             threadFinished = true;
+            MakeNextChunk();
         };
         functionsQueue.Add(toMainThread);
+    }
+
+    private void MakeNextChunk()
+    {
+        chunksQueue.RemoveAt(0);
+        Async(RegenerateSyncWrapper, chunksQueue[0]);
     }
 
     public void EditWorld(int x, int y, int z, int cubeType)
