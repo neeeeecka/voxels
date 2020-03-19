@@ -23,15 +23,24 @@ public class TerrainGeneratorAsync : MonoBehaviour
 
     public GameObject chunkPrefab;
 
-    void Start()
+
+    IEnumerator chunkGen()
     {
-        for(int x = 0; x < 10; x++)
+        for (int x = 0; x < 10; x++)
         {
             for (int z = 0; z < 10; z++)
             {
+                yield return new WaitForSeconds(0.1f);
                 MakeChunkAt(x, z);
             }
         }
+
+    }
+
+    void Start()
+    {
+        StartCoroutine(chunkGen());
+     
         
     }
 
@@ -39,11 +48,12 @@ public class TerrainGeneratorAsync : MonoBehaviour
 
     private void Update()
     {
-        //while(functionsQueue.Count > 0){
-        //    Action func = functionsQueue[0];
-        //    functionsQueue.RemoveAt(0);
-        //    func();
-        //}
+        while (functionsQueue.Count > 0)
+        {
+            Action func = functionsQueue[0];
+            functionsQueue.RemoveAt(0);
+            func();
+        }
     }
 
     public void MakeChunkAt(int x, int z)
@@ -55,7 +65,20 @@ public class TerrainGeneratorAsync : MonoBehaviour
         chunks.Add(new Vector2(x, z), data);
 
         data.SetRaw(InitChunkData(x, z));
-        data.RegenerateAsync();
+        if (threadFinished)
+        {
+            Async(RegenerateSyncWrapper, data);
+        }
+    }
+
+    private void RegenerateSyncWrapper(ChunkVoxelData data)
+    {
+        data.RegenerateSync();
+        Action toMainThread = () =>
+        {
+            threadFinished = true;
+        };
+        functionsQueue.Add(toMainThread);
     }
 
     public void EditWorld(int x, int y, int z, int cubeType)
@@ -77,7 +100,7 @@ public class TerrainGeneratorAsync : MonoBehaviour
             if (data.threadFinished)
             {
                 data.SetCell(chunkX, y, chunkZ, cubeType);
-                data.RegenerateSync();
+                data.RegenerateAsync();
             }
  
         }
@@ -107,8 +130,8 @@ public class TerrainGeneratorAsync : MonoBehaviour
         return raw;
 
     }
-    public void Async(Action func) {
-        Thread thread = new Thread(new ThreadStart(func));
+    public void Async(Action<ChunkVoxelData> func, ChunkVoxelData data) {
+        Thread thread = new Thread(() => func(data));
         thread.Start();
         threadFinished = false;
     }

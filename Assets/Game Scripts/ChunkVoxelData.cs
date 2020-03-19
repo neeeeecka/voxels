@@ -71,7 +71,7 @@ public class ChunkVoxelData : MonoBehaviour
 
         int[] triArr = triangles.ToArray();
 
-        Action toThread = () =>
+        Action toMainThread = () =>
         {
             mesh.Clear();
             mesh.vertices = _vertices;
@@ -81,9 +81,10 @@ public class ChunkVoxelData : MonoBehaviour
 
             meshCollider.sharedMesh = mesh;
             threadFinished = true;
+            Debug.Log("made");
         };
 
-        functionsQueue.Add(toThread);
+        functionsQueue.Add(toMainThread);
     }
     public void MakeChunk()
     {
