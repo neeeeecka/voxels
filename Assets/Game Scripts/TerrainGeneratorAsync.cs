@@ -130,22 +130,23 @@ public class TerrainGeneratorAsync : MonoBehaviour
     {
         int size = ChunkVoxelData.size;
         int[] raw = new int[size * size * size];
-        int floor = chunkPosY * 32;
+        int floor = chunkPosY * size;
 
         for (int x = 0; x < size; x++)
         {
             for (int z = 0; z < size; z++)
             {
-                int yVal = GetNoiseValue(chunkPosZ * ChunkVoxelData.size + z, chunkPosX * ChunkVoxelData.size + x);
+                int yVal = GetNoiseValue(
+                    chunkPosZ * size + z, 
+                    chunkPosX * size + x
+                    );
                 int cubeType = 3;
 
-                if (yVal / 32 == chunkPosY)
-                {
-                    for (int y = floor; y <= yVal; y++)
+                    for (int y = floor; y < yVal; y++)
                     {
-                        raw[x + size * (y % 32 + size * z)] = cubeType;
+                        raw[x + size * (y % size + size * z)] = cubeType;
                     }
-                }
+                
             }
         }
         return raw;
