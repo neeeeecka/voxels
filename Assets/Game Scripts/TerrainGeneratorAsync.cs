@@ -129,17 +129,20 @@ public class TerrainGeneratorAsync : MonoBehaviour
                 int yVal = GetNoiseValue(chunkPosZ * ChunkVoxelData.size + z, chunkPosX * ChunkVoxelData.size + x);
                 int cubeType = 3;
 
-                if (yVal <= waterlevel)
+                if(yVal > waterlevel) {
+                    for (int y = 1; y < yVal; y++)
+                    {
+                        raw[x + size * (y + size * z)] = cubeType;
+                    }
+                }
+                else
                 {
-                    yVal = waterlevel;
-                    cubeType = 6;
+                    //for (int y = 1; y < yVal; y++)
+                    //{
+                    //    raw[x + size * (y + size * z)] = cubeType;
+                    //}
                 }
 
-                for (int y = 1; y < yVal; y++)
-                {
-                    //int cubeType = cubeTypes - Mathf.FloorToInt((float)yVal / (float)maxTerrainHeight * cubeTypes);
-                    raw[x + size * (y + size * z)] = cubeType;
-                }
             }
         }
         return raw;
