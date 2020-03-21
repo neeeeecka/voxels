@@ -483,13 +483,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a8fc8f330e66df54ba05456dfb4e16eb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  exponent: 2
+  waterlevel: 10
   mountainScale: 0.01
-  mountainPersistence: 4
   stonesScale: 0.05
-  stonesPersistence: 1
   detailScale: 0.1
-  detailPersistence: 0.5
-  maxTerrainHeight: 32
+  maxTerrainHeight: 30
   blocksGenerated: 4822
   threadFinished: 1
   chunkPrefab: {fileID: 8997205017320476372, guid: 763f2b05658355d4f9d15d0211432d27,
@@ -663,7 +662,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1885856610
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -677,7 +676,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   path: TextureArray.asset
-  generate: 0
+  generate: 1
   success: 0
   textures:
   - {fileID: 2800000, guid: 9a0ba43eca8bcd44d949bdb0af38e6eb, type: 3}
@@ -685,6 +684,7 @@ MonoBehaviour:
   - {fileID: 2800000, guid: 96e5621124e952248a64879442fb518e, type: 3}
   - {fileID: 2800000, guid: dc4a36df883ca7144afb6f70a549c725, type: 3}
   - {fileID: 2800000, guid: 88bb5752af981774886808a68dd72b8f, type: 3}
+  - {fileID: 2800000, guid: 4f3c9112e7efc3b499151b7fb3167ec3, type: 3}
 --- !u!4 &1885856611
 Transform:
   m_ObjectHideFlags: 0

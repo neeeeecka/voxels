@@ -8,20 +8,17 @@ using Unity.Mathematics;
 
 public class TerrainGeneratorAsync : MonoBehaviour
 {
+    public int exponent = 2;
+    public int waterlevel = 5;
     [Range(0, 1f)]
     public float mountainScale = 0.01f;
-
-    public float mountainPersistence = 1f;
 
     [Range(0, 1f)]
     public float stonesScale = 0.1f;
 
-    public float stonesPersistence = 1f;
-
 
     [Range(0, 1f)]
     public float detailScale = 0.2f;
-    public float detailPersistence = 1f;
 
     public int maxTerrainHeight = 10;
     public int blocksGenerated = 0;
@@ -130,10 +127,17 @@ public class TerrainGeneratorAsync : MonoBehaviour
             for (int z = 0; z < size; z++)
             {
                 int yVal = GetNoiseValue(chunkPosZ * ChunkVoxelData.size + z, chunkPosX * ChunkVoxelData.size + x);
+                int cubeType = 3;
+
+                if (yVal <= waterlevel)
+                {
+                    yVal = waterlevel;
+                    cubeType = 6;
+                }
 
                 for (int y = 1; y < yVal; y++)
                 {
-                    int cubeType = cubeTypes - Mathf.FloorToInt((float)yVal / (float)maxTerrainHeight * cubeTypes);
+                    //int cubeType = cubeTypes - Mathf.FloorToInt((float)yVal / (float)maxTerrainHeight * cubeTypes);
                     raw[x + size * (y + size * z)] = cubeType;
                 }
             }
@@ -148,13 +152,13 @@ public class TerrainGeneratorAsync : MonoBehaviour
     }
     int GetNoiseValue(float x, float y)
     {
-        float mountains = Mathf.PerlinNoise(x * mountainScale, y * mountainScale) * mountainPersistence;
-        float stones = Mathf.PerlinNoise(x * stonesScale, y * stonesScale) * stonesPersistence;
-        float detail = Mathf.PerlinNoise(x * detailScale, y * detailScale) * detailPersistence;
+        float mountains = Mathf.PerlinNoise(x * mountainScale, y * mountainScale);
+        float stones = 0.5f * Mathf.PerlinNoise(x * stonesScale, y * stonesScale) * mountains;
+        float detail = 0.25f * Mathf.PerlinNoise(x * detailScale, y * detailScale) * (stones + mountains);
 
-        float sum = (mountains - 0.8f + stones + detail) / 3;
+        float e = mountains + stones + detail;
 
-        return Mathf.FloorToInt(Mathf.Clamp(sum, 0, 1) * (maxTerrainHeight-1));
+        return Mathf.FloorToInt(Mathf.Pow( Mathf.Clamp(e, 0, 1), exponent) * maxTerrainHeight);
     }
 
 }
