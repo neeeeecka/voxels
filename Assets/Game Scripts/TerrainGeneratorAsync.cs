@@ -131,24 +131,25 @@ public class TerrainGeneratorAsync : MonoBehaviour
     {
         int size = ChunkVoxelData.size;
         int[] raw = new int[size * size * size];
+        int floor = chunkPosY * 32;
 
-            for (int x = 0; x < size; x++)
+        for (int x = 0; x < size; x++)
+        {
+            for (int z = 0; z < size; z++)
             {
-                for (int z = 0; z < size; z++)
+                int yVal = GetNoiseValue(chunkPosZ * ChunkVoxelData.size + z, chunkPosX * ChunkVoxelData.size + x);
+                int cubeType = 3;
+
+                if (yVal / 32 == chunkPosY)
                 {
-                    int yVal = GetNoiseValue(chunkPosZ * ChunkVoxelData.size + z, chunkPosX * ChunkVoxelData.size + x);
-                    int cubeType = 3;
-
-                    for (int y = 1; y < yVal; y++)
+                    for (int y = floor; y <= yVal; y++)
                     {
-                        raw[x + size * (y + size * z)] = cubeType;
+                        raw[x + size * (y % 32 + size * z)] = cubeType;
                     }
-
                 }
             }
-       
+        }
         return raw;
-
     }
     public void Async(Action<ChunkVoxelData> func, ChunkVoxelData data) {
         Thread thread = new Thread(() => func(data));
