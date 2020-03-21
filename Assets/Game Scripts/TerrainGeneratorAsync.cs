@@ -8,6 +8,7 @@ using Unity.Mathematics;
 
 public class TerrainGeneratorAsync : MonoBehaviour
 {
+    public Vector3 worldDimensions = new Vector3(3, 3, 3);
     public int exponent = 2;
     public int waterlevel = 5;
     [Range(0, 1f)]
@@ -23,7 +24,7 @@ public class TerrainGeneratorAsync : MonoBehaviour
     public int maxTerrainHeight = 10;
     public int blocksGenerated = 0;
 
-    public Dictionary<Vector2, ChunkVoxelData> chunks = new Dictionary<Vector2, ChunkVoxelData>();
+    public Dictionary<Vector3, ChunkVoxelData> chunks = new Dictionary<Vector3, ChunkVoxelData>();
 
     public bool threadFinished = true;
 
@@ -31,16 +32,17 @@ public class TerrainGeneratorAsync : MonoBehaviour
 
     void Start()
     {
-        for (int x = 0; x < 10; x++)
+        for (int x = 0; x < worldDimensions.x; x++)
         {
-            for (int z = 0; z < 10; z++)
+            for (int y = 0; y < worldDimensions.y; y++)
             {
-                chunksQueue.Add(MakeChunkAt(x, z));
+                for (int z = 0; z < worldDimensions.z; z++)
+                {
+                    chunksQueue.Add(MakeChunkAt(x, y, z));
+                }
             }
         }
         MakeNextChunk();
-        //chunksQueue.Add(MakeChunkAt(0, 0));
-        //MakeNextChunk();
     }
 
     List<Action> functionsQueue = new List<Action>();
@@ -59,15 +61,20 @@ public class TerrainGeneratorAsync : MonoBehaviour
         }
     }
 
-    public ChunkVoxelData MakeChunkAt(int x, int z)
+    public ChunkVoxelData MakeChunkAt(int x, int y, int z)
     {
         
-        GameObject chunk = Instantiate(chunkPrefab, new Vector3(x * ChunkVoxelData.size + 0.5f, 0.5f, z * ChunkVoxelData.size + 0.5f), Quaternion.Euler(0, 0, 0), transform);
+        GameObject chunk = Instantiate(chunkPrefab, 
+            new Vector3(
+                x * ChunkVoxelData.size + 0.5f, 
+                y * ChunkVoxelData.size + 0.5f, 
+                z * ChunkVoxelData.size + 0.5f
+                ), Quaternion.Euler(0, 0, 0), transform);
         chunk.name = "c-" + x + "." + z;
         ChunkVoxelData data = chunk.GetComponent<ChunkVoxelData>();
-        chunks.Add(new Vector2(x, z), data);
+        chunks.Add(new Vector3(x, y, z), data);
 
-        data.SetRaw(InitChunkData(x, z));
+        data.SetRaw(InitChunkData(x, y, z));
         return data;
     }
 
@@ -95,18 +102,20 @@ public class TerrainGeneratorAsync : MonoBehaviour
     public void EditWorld(int x, int y, int z, int cubeType)
     {
         int chunkX = x % ChunkVoxelData.size;
+        int chunkY = y % ChunkVoxelData.size;
         int chunkZ = z % ChunkVoxelData.size;
 
         int chunkPosX = x / ChunkVoxelData.size;
+        int chunkPosY = y / ChunkVoxelData.size;
         int chunkPosZ = z / ChunkVoxelData.size;
 
         ChunkVoxelData data = null;
-        chunks.TryGetValue(new Vector2(chunkPosX, chunkPosZ), out data);
+        chunks.TryGetValue(new Vector3(chunkPosX, chunkPosY, chunkPosZ), out data);
         if (data)
         {
             if (data.threadFinished)
             {
-                data.SetCell(chunkX, y, chunkZ, cubeType);
+                data.SetCell(chunkX, chunkY, chunkZ, cubeType);
                 data.RegenerateAsync();
             }
         }
@@ -118,33 +127,26 @@ public class TerrainGeneratorAsync : MonoBehaviour
 
     int cubeTypes = 5;
 
-    public int[] InitChunkData(int chunkPosX, int chunkPosZ)
+    public int[] InitChunkData(int chunkPosX, int chunkPosY, int chunkPosZ)
     {
         int size = ChunkVoxelData.size;
         int[] raw = new int[size * size * size];
-        for (int x = 0; x < size; x++)
-        {
-            for (int z = 0; z < size; z++)
-            {
-                int yVal = GetNoiseValue(chunkPosZ * ChunkVoxelData.size + z, chunkPosX * ChunkVoxelData.size + x);
-                int cubeType = 3;
 
-                if(yVal > waterlevel) {
+            for (int x = 0; x < size; x++)
+            {
+                for (int z = 0; z < size; z++)
+                {
+                    int yVal = GetNoiseValue(chunkPosZ * ChunkVoxelData.size + z, chunkPosX * ChunkVoxelData.size + x);
+                    int cubeType = 3;
+
                     for (int y = 1; y < yVal; y++)
                     {
                         raw[x + size * (y + size * z)] = cubeType;
                     }
-                }
-                else
-                {
-                    //for (int y = 1; y < yVal; y++)
-                    //{
-                    //    raw[x + size * (y + size * z)] = cubeType;
-                    //}
-                }
 
+                }
             }
-        }
+       
         return raw;
 
     }
