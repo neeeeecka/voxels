@@ -9,15 +9,22 @@ using Unity.Mathematics;
 public class TerrainGeneratorAsync : MonoBehaviour
 {
     public Vector3 worldDimensions = new Vector3(3, 3, 3);
-    public int exponent = 2;
+
+    private float oldExp = 0;
+    public float exponent = 2;
+
+
     public int waterlevel = 5;
+
+    private float oldms = 0;
     [Range(0, 1f)]
     public float mountainScale = 0.01f;
 
+    private float oldss = 0;
     [Range(0, 1f)]
     public float stonesScale = 0.1f;
 
-
+    private float oldds = 0;
     [Range(0, 1f)]
     public float detailScale = 0.2f;
 
@@ -32,27 +39,64 @@ public class TerrainGeneratorAsync : MonoBehaviour
 
     void Start()
     {
+        oldExp = exponent;
+        oldms = mountainScale;
+        oldss = stonesScale;
+        oldds = detailScale;
+
         for (int x = 0; x < worldDimensions.x; x++)
         {
             for (int y = 0; y < worldDimensions.y; y++)
             {
                 for (int z = 0; z < worldDimensions.z; z++)
                 {
-                    chunksQueue.Add(MakeChunkAt(x, y, z));
+                    chunkUpdateQueue.Add(MakeChunkAt(x, y, z));
                 }
             }
         }
-        MakeNextChunk();
+        UpdateNextChunk();
     }
 
     List<Action> functionsQueue = new List<Action>();
-    List<ChunkVoxelData> chunksQueue = new List<ChunkVoxelData>();
+    List<ChunkVoxelData> chunkUpdateQueue = new List<ChunkVoxelData>();
 
     public Transform player;
     
 
     private void Update()
     {
+        if (
+            oldExp != exponent ||
+            oldms != mountainScale ||
+            oldds != detailScale ||
+            oldss != stonesScale
+        )
+        {
+            oldExp = exponent;
+            oldms = mountainScale;
+            oldss = stonesScale;
+            oldds = detailScale;
+
+            for (int x = 0; x < worldDimensions.x; x++)
+            {
+                for (int y = 0; y < worldDimensions.y; y++)
+                {
+                    for (int z = 0; z < worldDimensions.z; z++)
+                    {
+                        //ChunkVoxelData data;
+                        //chunks.TryGetValue(new Vector3(x, y, z), out data);
+
+                        //data.SetRaw(InitChunkData(x, y, z));
+                        //data.RegenerateAsync();
+                        //if (!chunkUpdateQueue.Contains(data))
+                        //{
+                        //    chunkUpdateQueue.Add(data);
+                        //    UpdateNextChunk();
+                        //}
+                    }
+                }
+            }
+        }
         while (functionsQueue.Count > 0)
         {
             Action func = functionsQueue[0];
@@ -83,23 +127,24 @@ public class TerrainGeneratorAsync : MonoBehaviour
         Action toMainThread = () =>
         {
             threadFinished = true;
-            chunksQueue.RemoveAt(0);
-            MakeNextChunk();
+            chunkUpdateQueue.RemoveAt(0);
+            UpdateNextChunk();
         };
         functionsQueue.Add(toMainThread);
     }
 
-    private void MakeNextChunk()
+    private void UpdateNextChunk()
     {
-        if (chunksQueue.Count >= 1)
+        if (chunkUpdateQueue.Count >= 1)
         {
-            Async(RegenerateSyncWrapper, chunksQueue[0]);
+            Async(RegenerateSyncWrapper, chunkUpdateQueue[0]);
             //RegenerateSyncWrapper(chunksQueue[0]);
         }
     }
 
     public void EditWorld(int x, int y, int z, int cubeType)
     {
+        //get intra chunk and chunk coordinates
         int chunkX = x % ChunkVoxelData.size;
         int chunkY = y % ChunkVoxelData.size;
         int chunkZ = z % ChunkVoxelData.size;
@@ -137,16 +182,15 @@ public class TerrainGeneratorAsync : MonoBehaviour
             for (int z = 0; z < size; z++)
             {
                 int yVal = GetNoiseValue(
-                    chunkPosZ * size + z, 
+                    chunkPosZ * size + z,
                     chunkPosX * size + x
                     );
                 int cubeType = 3;
 
-                    for (int y = floor; y < yVal; y++)
-                    {
-                        raw[x + size * (y % size + size * z)] = cubeType;
-                    }
-                
+                for (int y = floor; y < yVal; y++)
+                {
+                    raw[x + size * (y % size + size * z)] = cubeType;
+                }
             }
         }
         return raw;

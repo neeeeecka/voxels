@@ -483,8 +483,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a8fc8f330e66df54ba05456dfb4e16eb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  worldDimensions: {x: 3, y: 3, z: 3}
-  exponent: 2
+  worldDimensions: {x: 5, y: 3, z: 5}
+  exponent: 0.65
   waterlevel: 10
   mountainScale: 0.01
   stonesScale: 0.05
