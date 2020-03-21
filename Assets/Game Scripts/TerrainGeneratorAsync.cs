@@ -62,15 +62,14 @@ public class TerrainGeneratorAsync : MonoBehaviour
     }
 
     public ChunkVoxelData MakeChunkAt(int x, int y, int z)
-    {
-        
+    { 
         GameObject chunk = Instantiate(chunkPrefab, 
             new Vector3(
                 x * ChunkVoxelData.size + 0.5f, 
                 y * ChunkVoxelData.size + 0.5f, 
                 z * ChunkVoxelData.size + 0.5f
                 ), Quaternion.Euler(0, 0, 0), transform);
-        chunk.name = "c-" + x + "." + z;
+        chunk.name = "chunk: (" + x + "." + y + "." + z+")";
         ChunkVoxelData data = chunk.GetComponent<ChunkVoxelData>();
         chunks.Add(new Vector3(x, y, z), data);
 
