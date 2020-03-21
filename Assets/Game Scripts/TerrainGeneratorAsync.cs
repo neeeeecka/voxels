@@ -8,10 +8,20 @@ using Unity.Mathematics;
 
 public class TerrainGeneratorAsync : MonoBehaviour
 {
+    [Range(0, 1f)]
+    public float mountainScale = 0.01f;
 
-    [Range(0, 0.1f)]
-    public float scale = 0.01f;
+    public float mountainPersistence = 1f;
 
+    [Range(0, 1f)]
+    public float stonesScale = 0.1f;
+
+    public float stonesPersistence = 1f;
+
+
+    [Range(0, 1f)]
+    public float detailScale = 0.2f;
+    public float detailPersistence = 1f;
 
     public int maxTerrainHeight = 10;
     public int blocksGenerated = 0;
@@ -109,6 +119,8 @@ public class TerrainGeneratorAsync : MonoBehaviour
         }
     }
 
+    int cubeTypes = 5;
+
     public int[] InitChunkData(int chunkPosX, int chunkPosZ)
     {
         int size = ChunkVoxelData.size;
@@ -119,9 +131,9 @@ public class TerrainGeneratorAsync : MonoBehaviour
             {
                 int yVal = GetNoiseValue(chunkPosZ * ChunkVoxelData.size + z, chunkPosX * ChunkVoxelData.size + x);
 
-                for (int y = yVal - 1; y >= 0; y--)
+                for (int y = 1; y < yVal; y++)
                 {
-                    int cubeType = 4 - Mathf.FloorToInt((float)yVal / (float)maxTerrainHeight * 4);
+                    int cubeType = cubeTypes - Mathf.FloorToInt((float)yVal / (float)maxTerrainHeight * cubeTypes);
                     raw[x + size * (y + size * z)] = cubeType;
                 }
             }
@@ -136,7 +148,13 @@ public class TerrainGeneratorAsync : MonoBehaviour
     }
     int GetNoiseValue(float x, float y)
     {
-        return Mathf.FloorToInt(Mathf.PerlinNoise(x * scale, y * scale) * maxTerrainHeight);
+        float mountains = Mathf.PerlinNoise(x * mountainScale, y * mountainScale) * mountainPersistence;
+        float stones = Mathf.PerlinNoise(x * stonesScale, y * stonesScale) * stonesPersistence;
+        float detail = Mathf.PerlinNoise(x * detailScale, y * detailScale) * detailPersistence;
+
+        float sum = (mountains - 0.8f + stones + detail) / 3;
+
+        return Mathf.FloorToInt(Mathf.Clamp(sum, 0, 1) * (maxTerrainHeight-1));
     }
 
 }

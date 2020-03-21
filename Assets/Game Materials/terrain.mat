@@ -20,6 +20,10 @@ Material:
   m_SavedProperties:
     serializedVersion: 3
     m_TexEnvs:
+    - Texture2DArray_12D7EE87:
+        m_Texture: {fileID: 18700000, guid: 1b8ab50056e4f524f9c8b99ad9901863, type: 2}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - Texture2D_CDE17695:
         m_Texture: {fileID: 2800000, guid: 752f0b98036a33b44be954892c9ede8b, type: 3}
         m_Scale: {x: 1, y: 1}
@@ -73,7 +77,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _SampleTexture2DArray_3AA7AD9A_TextureArray_1:
-        m_Texture: {fileID: 18700000, guid: f29efdff3fe507a40a264313c1f84180, type: 2}
+        m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _SpecGlossMap:

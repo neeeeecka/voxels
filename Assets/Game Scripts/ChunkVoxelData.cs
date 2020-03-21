@@ -7,7 +7,7 @@ using UnityEngine;
 public class ChunkVoxelData : MonoBehaviour
 {
 
-    private int[] raw = new int[32*32*32];
+    private int[] raw = new int[32 * 32 * 32];
     public static int size = 32;
 
     Dictionary<VertexSignature, int> verticesDict = new Dictionary<VertexSignature, int>();
