@@ -13,6 +13,7 @@ public class TerrainGeneratorAsync : MonoBehaviour
     private float oldExp = 0;
     public float exponent = 2;
 
+    public int terraces = 0;
 
     public int waterlevel = 5;
 
@@ -32,6 +33,7 @@ public class TerrainGeneratorAsync : MonoBehaviour
     public int blocksGenerated = 0;
 
     public Dictionary<Vector3, ChunkVoxelData> chunks = new Dictionary<Vector3, ChunkVoxelData>();
+    //public int[] chunks = new int[3 * 3 * 3];
 
     public bool threadFinished = true;
 
@@ -115,6 +117,8 @@ public class TerrainGeneratorAsync : MonoBehaviour
                 ), Quaternion.Euler(0, 0, 0), transform);
         chunk.name = "chunk: (" + x + "." + y + "." + z+")";
         ChunkVoxelData data = chunk.GetComponent<ChunkVoxelData>();
+        data.terrain = this;
+        data.chunkPos = new Vector3(x, y, z);
         chunks.Add(new Vector3(x, y, z), data);
 
         data.SetRaw(InitChunkData(x, y, z));
@@ -123,7 +127,7 @@ public class TerrainGeneratorAsync : MonoBehaviour
 
     private void RegenerateSyncWrapper(ChunkVoxelData data)
     {
-        data.RegenerateSync();
+        data.RegenerateSync(true);
         Action toMainThread = () =>
         {
             threadFinished = true;
@@ -142,25 +146,115 @@ public class TerrainGeneratorAsync : MonoBehaviour
         }
     }
 
+    public ChunkVoxelData GetChunk(int worldX, int worldY, int worldZ)
+    {
+        int size = ChunkVoxelData.size;
+
+        int chunkPosX = worldX / size;
+        int chunkPosY = worldY / size;
+        int chunkPosZ = worldZ / size;
+
+        ChunkVoxelData chunk = null;
+        chunks.TryGetValue(new Vector3(chunkPosX, chunkPosY, chunkPosZ), out chunk);
+
+        return chunk;
+    }
+
+    public int GetBlockAt(int x, int y, int z)
+    {
+        int size = ChunkVoxelData.size;
+        int chunkX = x % size;
+        int chunkY = y % size;
+        int chunkZ = z % size;
+
+        if(x < 0 || x >= worldDimensions.x * size)
+        {
+            return 0;
+        }
+        if (y < 0 || y >= worldDimensions.y * size)
+        {
+            return 0;
+        }
+        if (z < 0 || z >= worldDimensions.z * size)
+        {
+            return 0;
+        }
+
+        ChunkVoxelData chunk = GetChunk(x, y, z);
+
+        return chunk.GetCell(chunkX, chunkY, chunkZ);
+    }
+
     public void EditWorld(int x, int y, int z, int cubeType)
     {
-        //get intra chunk and chunk coordinates
-        int chunkX = x % ChunkVoxelData.size;
-        int chunkY = y % ChunkVoxelData.size;
-        int chunkZ = z % ChunkVoxelData.size;
+        int size = ChunkVoxelData.size;
+        //get intra chunk coordinates
+        int chunkX = x % size;
+        int chunkY = y % size;
+        int chunkZ = z % size;
 
-        int chunkPosX = x / ChunkVoxelData.size;
-        int chunkPosY = y / ChunkVoxelData.size;
-        int chunkPosZ = z / ChunkVoxelData.size;
+        ChunkVoxelData[] adjacentChunks = new ChunkVoxelData[3];
 
-        ChunkVoxelData data = null;
-        chunks.TryGetValue(new Vector3(chunkPosX, chunkPosY, chunkPosZ), out data);
-        if (data)
+        ChunkVoxelData chunk = GetChunk(x, y, z);
+        bool needsGlobalChange = false;
+
+        if (chunkX == size - 1)
         {
-            if (data.threadFinished)
+            adjacentChunks[0] = GetChunk(x + 1, y, z);
+            needsGlobalChange = true;
+        }
+        if (chunkX == 0)
+        {
+            adjacentChunks[0] = GetChunk(x - 1, y, z);
+            needsGlobalChange = true;
+
+        }
+
+        if (chunkY == size - 1)
+        {
+            adjacentChunks[1] = GetChunk(x, y + 1, z);
+            needsGlobalChange = true;
+
+        }
+        if (chunkY == 0)
+        {
+            adjacentChunks[1] = GetChunk(x, y - 1, z);
+            needsGlobalChange = true;
+
+        }
+
+        if (chunkZ == size - 1)
+        {
+            adjacentChunks[2] = GetChunk(x, y, z + 1);
+            needsGlobalChange = true;
+
+        }
+        if (chunkZ == 0)
+        {
+            adjacentChunks[2] = GetChunk(x, y, z - 1);
+            needsGlobalChange = true;
+
+        }
+
+        if (chunk)
+        {
+            if (chunk.threadFinished)
             {
-                data.SetCell(chunkX, chunkY, chunkZ, cubeType);
-                data.RegenerateAsync();
+                chunk.SetCell(chunkX, chunkY, chunkZ, cubeType);
+                //chunk.RegenerateSync();
+
+                for (int i = 0; i < 3; i++)
+                {
+                    if (adjacentChunks[i] != null)
+                    {
+                        if (adjacentChunks[i].threadFinished)
+                        {
+                            adjacentChunks[i].RegenerateAsync(true);
+                        }
+                    }
+                }
+                chunk.RegenerateAsync(needsGlobalChange);
+
             }
         }
         else
@@ -168,6 +262,8 @@ public class TerrainGeneratorAsync : MonoBehaviour
             Debug.LogError("Chunk not found");
         }
     }
+
+    
 
     int cubeTypes = 5;
 
@@ -206,9 +302,12 @@ public class TerrainGeneratorAsync : MonoBehaviour
         float stones = 0.5f * Mathf.PerlinNoise(x * stonesScale, y * stonesScale) * mountains;
         float detail = 0.25f * Mathf.PerlinNoise(x * detailScale, y * detailScale) * (stones + mountains);
 
-        float e = mountains + stones + detail;
+        float e = Mathf.Clamp(mountains + stones + detail, 0, 1);
 
-        return Mathf.FloorToInt(Mathf.Pow( Mathf.Clamp(e, 0, 1), exponent) * maxTerrainHeight);
+        //e = Mathf.Round(e * terraces) / terraces;
+        e = Mathf.Pow(e, exponent);
+
+        return Mathf.FloorToInt(e * maxTerrainHeight);
     }
 
 }

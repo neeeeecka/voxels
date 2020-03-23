@@ -47,7 +47,6 @@ public class Build : MonoBehaviour
                 Vector3 hitDir = hit.normal;
                 Vector3 worldPos = hit.point;
 
-
                 worldPos -= hitDir / 2;
 
                 int x = Mathf.FloorToInt(worldPos.x);

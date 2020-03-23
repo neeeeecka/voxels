@@ -7,6 +7,7 @@ using UnityEngine;
 public class ChunkVoxelData : MonoBehaviour
 {
 
+    public Vector3 chunkPos = Vector3.zero;
     private int[] raw = new int[32 * 32 * 32];
     public static int size = 32;
 
@@ -16,7 +17,7 @@ public class ChunkVoxelData : MonoBehaviour
     List<int> triangles = new List<int>();
 
     Vector3[] _normals;
-    Vector3[] _uvs;
+    Vector4[] _uvs;
     Vector3[] _vertices;
 
     Mesh mesh;
@@ -27,7 +28,7 @@ public class ChunkVoxelData : MonoBehaviour
     List<Action> functionsQueue = new List<Action>();
 
     public int blocksGenerated = 0;
-
+    public TerrainGeneratorAsync terrain;
 
     public bool ready = false;
 
@@ -55,18 +56,19 @@ public class ChunkVoxelData : MonoBehaviour
         this.raw = arr;
     }
 
-    public void RegenerateAsync()
+    public void RegenerateAsync(bool needsGlobalChange)
     {
-        Async(ChunkUpdate);
+        //Debug.Log("Needs global change: " + needsGlobalChange);
+        Async(ChunkUpdate, needsGlobalChange);
     }
-    public void RegenerateSync()
+    public void RegenerateSync(bool needsGlobalChange)
     {
-        ChunkUpdate();
+        ChunkUpdate(needsGlobalChange);
     }
 
-    public void ChunkUpdate()
+    public void ChunkUpdate(bool needsGlobalChange)
     {
-        MakeChunk();
+        MakeChunk(needsGlobalChange);
         PrepareMeshData();
 
         int[] triArr = triangles.ToArray();
@@ -77,7 +79,7 @@ public class ChunkVoxelData : MonoBehaviour
             mesh.vertices = _vertices;
             mesh.normals = _normals;
             mesh.triangles = triArr;
-            mesh.SetUVs(0, new List<Vector3>(_uvs));
+            mesh.SetUVs(0, new List<Vector4>(_uvs));
 
             meshCollider.sharedMesh = mesh;
             threadFinished = true;
@@ -85,7 +87,7 @@ public class ChunkVoxelData : MonoBehaviour
 
         functionsQueue.Add(toMainThread);
     }
-    public void MakeChunk()
+    public void MakeChunk(bool needsGlobalChange)
     {
         blocksGenerated = 0;
         vertexCount = 0;
@@ -102,22 +104,37 @@ public class ChunkVoxelData : MonoBehaviour
                 int x = i % size;
                 int y = (i / size) % size;
                 int z = i / (size * size);
-                MakeCube(x, y, z, cubeType);
+                MakeCube(x, y, z, cubeType, needsGlobalChange);
                 blocksGenerated++;
             }
         }
     }
 
-    void MakeCube(int x, int y, int z, int cubeType)
+    void MakeCube(int x, int y, int z, int cubeType, bool needsGlobalChange)
     {
-        for (int i = 0; i < 6; i++)
+        if (needsGlobalChange)
         {
-            Direction dir = (Direction)i;
-            if (GetNeighbor(x, y, z, dir) == 0)
+            for (int i = 0; i < 6; i++)
             {
-                MakeFace(dir, x, y, z, cubeType);
+                Direction dir = (Direction)i;
+                if (GetGlobalNeighbor(x, y, z, dir) == 0)
+                {
+                    MakeFace(dir, x, y, z, cubeType);
+                }
             }
         }
+        else
+        {
+            for (int i = 0; i < 6; i++)
+            {
+                Direction dir = (Direction)i;
+                if (GetNeighbor(x, y, z, dir) == 0)
+                {
+                    MakeFace(dir, x, y, z, cubeType);
+                }
+            }
+        }
+
     }
     void MakeFace(Direction dir, int x, int y, int z, int cubeType)
     {
@@ -149,27 +166,55 @@ public class ChunkVoxelData : MonoBehaviour
         );
 
     }
+
+    float VertexAO(int side1, int side2, float corner)
+    {
+        if (side1 == 1 && side2 == 1)
+        {
+            return 0;
+        }
+        return 3 - (side1 + side2 + corner);
+    }
+
     void PrepareMeshData()
     {
         _vertices = new Vector3[vertexCount];
         _normals = new Vector3[vertexCount];
-        _uvs = new Vector3[vertexCount];
+        _uvs = new Vector4[vertexCount];
 
         foreach (var pair in verticesDict)
         {
             int index = pair.Value;
             CubeMeshData.DataCoordinate coord = CubeMeshData.offsets[(int)pair.Key.normal];
-            Vector3 uv = CubeMeshData.ProjectPositionToUV(pair.Key.position, pair.Key.normal);
+            Vector4 uv = CubeMeshData.ProjectPositionToUV(pair.Key.position, pair.Key.normal);
             uv.z = pair.Key.cubeType;
 
             _vertices[index] = pair.Key.position;
             _normals[index] = new Vector3(coord.x, coord.y, coord.z);
+
+            //Vector3 worldPos = pair.Key.position;
+            //Vector3 normal = CubeMeshData.offsets[(int)pair.Key.normal].ToVector();
+
+            //worldPos -= normal * 0.5f;
+
+            //int x = Mathf.FloorToInt(worldPos.x);
+            //int y = Mathf.FloorToInt(worldPos.y);
+            //int z = Mathf.FloorToInt(worldPos.z);
+
+            //int side1 = GetNeighbor(x, y, z, Direction.North) != 0 ? 1 : 0;
+            //int side2 = GetNeighbor(x, y, z, Direction.West) != 0 ? 1 : 0;
+
+            //uv.w = VertexAO(side1, side2, 1);
+
+            uv.w = 1;
             _uvs[index] = uv;
         }
     }
-    public void Async(Action func)
+    public void Async(Action<bool> func, bool param)
     {
-        Thread thread = new Thread(new ThreadStart(func));
+        //Thread thread = new Thread(new ThreadStart(func));
+        Thread thread = new Thread(() => func(param));
+
         thread.Start();
         threadFinished = false;
     }
@@ -219,6 +264,21 @@ public class ChunkVoxelData : MonoBehaviour
     public void SetCell(int x, int y, int z, int val)
     {
         raw[x + size * (y + size * z)] = val;
+    }
+    public int GetGlobalNeighbor(int x, int y, int z, Direction dir)
+    {
+        x = x + size * (int)chunkPos.x;
+        y = y + size * (int)chunkPos.y;
+        z = z + size * (int)chunkPos.z;
+
+        CubeMeshData.DataCoordinate checkOffset = CubeMeshData.offsets[(int)dir];
+        CubeMeshData.DataCoordinate neighborCoordinate = new CubeMeshData.DataCoordinate(
+            x + checkOffset.x,
+            y + checkOffset.y,
+            z + checkOffset.z
+        );
+
+        return terrain.GetBlockAt(neighborCoordinate.x, neighborCoordinate.y, neighborCoordinate.z);
     }
     public int GetNeighbor(int x, int y, int z, Direction dir)
     {

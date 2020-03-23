@@ -127,7 +127,14 @@ public class Controller : MonoBehaviour
         }
         else
         {
-            isGrounded = false;
+            if (controller.velocity.y == 0)
+            {
+                isGrounded = true;
+            }
+            else
+            {
+                isGrounded = false;
+            }
         }
 
 

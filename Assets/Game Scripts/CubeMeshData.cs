@@ -17,7 +17,10 @@ public static class CubeMeshData
             this.y = y;
             this.z = z;
         }
-
+        public Vector3 ToVector()
+        {
+            return new Vector3(x, y, z);
+        }
     };
     public static DataCoordinate[] offsets = {
         new DataCoordinate(0, 0, 1),
