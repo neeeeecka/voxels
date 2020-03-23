@@ -490,7 +490,7 @@ MonoBehaviour:
   mountainScale: 0.01
   stonesScale: 0.05
   detailScale: 0.1
-  maxTerrainHeight: 68
+  maxTerrainHeight: 48
   blocksGenerated: 4822
   threadFinished: 1
   chunkPrefab: {fileID: 8997205017320476372, guid: 763f2b05658355d4f9d15d0211432d27,

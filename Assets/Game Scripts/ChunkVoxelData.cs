@@ -8,8 +8,8 @@ public class ChunkVoxelData : MonoBehaviour
 {
 
     public Vector3 chunkPos = Vector3.zero;
-    private int[] raw = new int[32 * 32 * 32];
-    public static int size = 32;
+    private int[] raw = new int[16 * 16 * 16];
+    public static int size = 16;
 
     Dictionary<VertexSignature, int> verticesDict = new Dictionary<VertexSignature, int>();
     int vertexCount = 0;
@@ -31,6 +31,8 @@ public class ChunkVoxelData : MonoBehaviour
     public TerrainGeneratorAsync terrain;
 
     public bool ready = false;
+    public bool isEmpty = true;
+
 
     void Start()
     {
@@ -51,19 +53,23 @@ public class ChunkVoxelData : MonoBehaviour
         }
     }
 
-    public void SetRaw(int[] arr)
+    public void SetRaw(int[] arr, bool isEmpty)
     {
+        this.isEmpty = isEmpty;
         this.raw = arr;
     }
 
     public void RegenerateAsync(bool needsGlobalChange)
     {
         //Debug.Log("Needs global change: " + needsGlobalChange);
-        Async(ChunkUpdate, needsGlobalChange);
+        //Debug.Log("chunk " + chunkPos);
+            Async(ChunkUpdate, needsGlobalChange);
     }
     public void RegenerateSync(bool needsGlobalChange)
     {
-        ChunkUpdate(needsGlobalChange);
+
+            Async(ChunkUpdate, needsGlobalChange);
+        
     }
 
     public void ChunkUpdate(bool needsGlobalChange)
@@ -263,6 +269,10 @@ public class ChunkVoxelData : MonoBehaviour
     }
     public void SetCell(int x, int y, int z, int val)
     {
+        if(val != 0)
+        {
+            isEmpty = false;
+        }
         raw[x + size * (y + size * z)] = val;
     }
     public int GetGlobalNeighbor(int x, int y, int z, Direction dir)

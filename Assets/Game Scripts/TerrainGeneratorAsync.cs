@@ -121,13 +121,23 @@ public class TerrainGeneratorAsync : MonoBehaviour
         data.chunkPos = new Vector3(x, y, z);
         chunks.Add(new Vector3(x, y, z), data);
 
-        data.SetRaw(InitChunkData(x, y, z));
+        //data.SetRaw(InitChunkData(x, y, z));
+        InitChunkData(x, y, z, data);
         return data;
     }
 
     private void RegenerateSyncWrapper(ChunkVoxelData data)
     {
-        data.RegenerateSync(true);
+        if (!data.isEmpty)
+        {
+            data.RegenerateSync(true);
+        }
+        else
+        {
+            data.threadFinished = true;
+        }
+      
+
         Action toMainThread = () =>
         {
             threadFinished = true;
@@ -236,8 +246,10 @@ public class TerrainGeneratorAsync : MonoBehaviour
 
         }
 
+
         if (chunk)
         {
+            //Debug.Log("chunk found " + x / size + " - " + y / size + " - " + z / size);
             if (chunk.threadFinished)
             {
                 chunk.SetCell(chunkX, chunkY, chunkZ, cubeType);
@@ -247,19 +259,18 @@ public class TerrainGeneratorAsync : MonoBehaviour
                 {
                     if (adjacentChunks[i] != null)
                     {
-                        if (adjacentChunks[i].threadFinished)
+                        if (adjacentChunks[i].threadFinished && !adjacentChunks[i].isEmpty)
                         {
                             adjacentChunks[i].RegenerateAsync(true);
                         }
                     }
                 }
                 chunk.RegenerateAsync(needsGlobalChange);
-
             }
         }
         else
         {
-            Debug.LogError("Chunk not found");
+            Debug.LogError("Chunk not found: " + x + " - " + y + " - " + z);
         }
     }
 
@@ -267,11 +278,19 @@ public class TerrainGeneratorAsync : MonoBehaviour
 
     int cubeTypes = 5;
 
-    public int[] InitChunkData(int chunkPosX, int chunkPosY, int chunkPosZ)
+    public int[] InitChunkData(int chunkPosX, int chunkPosY, int chunkPosZ, ChunkVoxelData data)
     {
         int size = ChunkVoxelData.size;
         int[] raw = new int[size * size * size];
         int floor = chunkPosY * size;
+
+        bool isEmpty = true;
+
+        if(chunkPosY * size > maxTerrainHeight)
+        {
+            data.SetRaw(raw, isEmpty);
+            return raw;
+        }
 
         for (int x = 0; x < size; x++)
         {
@@ -283,12 +302,18 @@ public class TerrainGeneratorAsync : MonoBehaviour
                     );
                 int cubeType = 3;
 
+                if (yVal / size >= chunkPosY)
+                {
+                    isEmpty = false;
+                }
+
                 for (int y = floor; y < yVal; y++)
                 {
                     raw[x + size * (y % size + size * z)] = cubeType;
                 }
             }
         }
+        data.SetRaw(raw, isEmpty);
         return raw;
     }
     public void Async(Action<ChunkVoxelData> func, ChunkVoxelData data) {
