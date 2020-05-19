@@ -33,7 +33,6 @@ public class ChunkVoxelData : MonoBehaviour
     public bool ready = false;
     public bool isEmpty = true;
 
-
     void Start()
     {
         mesh = new Mesh();
@@ -63,13 +62,15 @@ public class ChunkVoxelData : MonoBehaviour
     {
         //Debug.Log("Needs global change: " + needsGlobalChange);
         //Debug.Log("chunk " + chunkPos);
+
+            needsGlobalChange = true;
             Async(ChunkUpdate, needsGlobalChange);
+            //ChunkUpdate(needsGlobalChange)
     }
     public void RegenerateSync(bool needsGlobalChange)
     {
-
-            Async(ChunkUpdate, needsGlobalChange);
-        
+        ChunkUpdate(true);
+        //Debug.Log("reg");
     }
 
     public void ChunkUpdate(bool needsGlobalChange)

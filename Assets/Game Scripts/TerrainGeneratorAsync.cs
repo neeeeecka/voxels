@@ -262,10 +262,12 @@ public class TerrainGeneratorAsync : MonoBehaviour
                         if (adjacentChunks[i].threadFinished && !adjacentChunks[i].isEmpty)
                         {
                             adjacentChunks[i].RegenerateAsync(true);
+                            //adjacentChunks[i].RegenerateSync(true);
                         }
                     }
                 }
-                chunk.RegenerateAsync(needsGlobalChange);
+                chunk.RegenerateAsync(true);
+                //chunk.RegenerateSync(true);
             }
         }
         else
