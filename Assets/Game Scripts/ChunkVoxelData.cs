@@ -150,7 +150,7 @@ public class ChunkVoxelData : MonoBehaviour
 
         Vector3[] faceVertices = CubeMeshData.faceVertices((int)dir, x, y, z);
         int[] triangleIndices = new int[4];
-        signature.cubeType = cubeType;
+        signature.cubeType = (char)cubeType;
 
         for (int i = 0; i < 4; i++)
         {
@@ -171,7 +171,7 @@ public class ChunkVoxelData : MonoBehaviour
             triangleIndices[3]
             }
         );
-
+ 
     }
 
     float VertexAO(int side1, int side2, float corner)
@@ -229,16 +229,16 @@ public class ChunkVoxelData : MonoBehaviour
     {
         public Vector3 position;
         public Direction normal;
-        public int cubeType;
+        public char cubeType;
 
         public override int GetHashCode()
         {
-            int x = (int)(position.x * 2);
-            int y = (int)(position.y * 2);
-            int z = (int)(position.z * 2);
+            char x = (char)(position.x * 2);
+            char y = (char)(position.y * 2);
+            char z = (char)(position.z * 2);
 
-            int n = (int)normal;
-            int c = cubeType;
+            char n = (char)normal;
+            char c = cubeType;
 
             int p = (((x + y * size * 2) * size * 2 + z) * 6 + n) * 4 + c;
             return p;
