@@ -199,21 +199,21 @@ public class ChunkVoxelData : MonoBehaviour
             _vertices[index] = pair.Key.position;
             _normals[index] = new Vector3(coord.x, coord.y, coord.z);
 
-            //Vector3 worldPos = pair.Key.position;
-            //Vector3 normal = CubeMeshData.offsets[(int)pair.Key.normal].ToVector();
+            //get vertex chunk position
+            Vector3 chunkPos = pair.Key.position;
+            Vector3 normal = CubeMeshData.offsets[(int)pair.Key.normal].ToVector();
 
-            //worldPos -= normal * 0.5f;
+            int cx = Mathf.FloorToInt(chunkPos.x) + (int)normal.x;
+            int cy = Mathf.FloorToInt(chunkPos.y) + (int)normal.y;
+            int cz = Mathf.FloorToInt(chunkPos.z) + (int)normal.y;
 
-            //int x = Mathf.FloorToInt(worldPos.x);
-            //int y = Mathf.FloorToInt(worldPos.y);
-            //int z = Mathf.FloorToInt(worldPos.z);
+            int side1 = GetNeighbor(cx, cy, cz, Direction.East);
+            int side2 = GetNeighbor(cx, cy, cz, Direction.West);
+            int side3 = GetNeighbor(cx, cy, cz, Direction.North);
+            int side4 = GetNeighbor(cx, cy, cz, Direction.South);
 
-            //int side1 = GetNeighbor(x, y, z, Direction.North) != 0 ? 1 : 0;
-            //int side2 = GetNeighbor(x, y, z, Direction.West) != 0 ? 1 : 0;
 
-            //uv.w = VertexAO(side1, side2, 1);
-
-            uv.w = 1;
+            uv.w = (side1 + side2 + side3 + side4) + 1;
             _uvs[index] = uv;
         }
     }
