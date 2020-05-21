@@ -209,14 +209,28 @@ public class ChunkVoxelData : MonoBehaviour
 
             int side1 = GetNeighbor(cx, cy, cz, Direction.East);
             int side2 = GetNeighbor(cx, cy, cz, Direction.West);
-            int side3 = GetNeighbor(cx, cy, cz, Direction.North);
-            int side4 = GetNeighbor(cx, cy, cz, Direction.South);
+            int corner = GetNeighbor(cx, cy, cz, Direction.Down);
+
+            //int side3 = GetNeighbor(cx, cy, cz, Direction.North);
+            //int side4 = GetNeighbor(cx, cy, cz, Direction.South);
 
 
-            uv.w = (side1 + side2 + side3 + side4) + 1;
+            //uv.w = (side1 + side2 + side3 + side4) + 1;
+            //uv.w = (side1 + side2 + corner) + 1;
+
+            //uv.w = VertexAO(side1, side2, corner);
+            uv.w = 1;
             _uvs[index] = uv;
         }
     }
+    public int VertexAO(int side1, int side2, int corner)
+    {
+        if (side1 != 0 && side2 != 0)
+        {
+            return 0;
+        }
+        return 3 - (side1 + side2 + corner);
+}
     public void Async(Action<bool> func, bool param)
     {
         //Thread thread = new Thread(new ThreadStart(func));
