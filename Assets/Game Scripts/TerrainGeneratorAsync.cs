@@ -56,49 +56,107 @@ public class TerrainGeneratorAsync : MonoBehaviour
                 }
             }
         }
+
+        chunkUpdateQueue.Add(MakeChunkAt(12, 3, 12));
+
+
         UpdateNextChunk();
+
+
+        // if (c < 20)
+        // {
+        //     ChunkVoxelData ch = GetChunk(-1, 0, 0);
+        //     Debug.Log(ch);
+        // }
+
+
     }
 
     List<Action> functionsQueue = new List<Action>();
     List<ChunkVoxelData> chunkUpdateQueue = new List<ChunkVoxelData>();
 
     public Transform player;
-    
+
+
+    int c = 0;
 
     private void Update()
     {
-        if (
-            oldExp != exponent ||
-            oldms != mountainScale ||
-            oldds != detailScale ||
-            oldss != stonesScale
-        )
+
+        // if (
+        //     oldExp != exponent ||
+        //     oldms != mountainScale ||
+        //     oldds != detailScale ||
+        //     oldss != stonesScale
+        // )
+        // {
+        //     oldExp = exponent;
+        //     oldms = mountainScale;
+        //     oldss = stonesScale;
+        //     oldds = detailScale;
+
+        //     for (int x = 0; x < worldDimensions.x; x++)
+        //     {
+        //         for (int y = 0; y < worldDimensions.y; y++)
+        //         {
+        //             for (int z = 0; z < worldDimensions.z; z++)
+        //             {
+        //                 //ChunkVoxelData data;
+        //                 //chunks.TryGetValue(new Vector3(x, y, z), out data);
+
+        //                 //data.SetRaw(InitChunkData(x, y, z));
+        //                 //data.RegenerateAsync();
+        //                 //if (!chunkUpdateQueue.Contains(data))
+        //                 //{
+        //                 //    chunkUpdateQueue.Add(data);
+        //                 //    UpdateNextChunk();
+        //                 //}
+        //             }
+        //         }
+        //     }
+        // }
+
+
+
+
+
+        int radius = 3;
+        int unit = ChunkVoxelData.size;
+
+        Vector3 viewPos = player.transform.position / unit;
+
+        for (int x = 0; x < radius; x++)
         {
-            oldExp = exponent;
-            oldms = mountainScale;
-            oldss = stonesScale;
-            oldds = detailScale;
-
-            for (int x = 0; x < worldDimensions.x; x++)
+            for (int z = 0; z < radius; z++)
             {
-                for (int y = 0; y < worldDimensions.y; y++)
-                {
-                    for (int z = 0; z < worldDimensions.z; z++)
-                    {
-                        //ChunkVoxelData data;
-                        //chunks.TryGetValue(new Vector3(x, y, z), out data);
 
-                        //data.SetRaw(InitChunkData(x, y, z));
-                        //data.RegenerateAsync();
-                        //if (!chunkUpdateQueue.Contains(data))
-                        //{
-                        //    chunkUpdateQueue.Add(data);
-                        //    UpdateNextChunk();
-                        //}
+                int realX = (int)viewPos.x + x;
+                int realZ = (int)viewPos.z + z;
+
+                Vector3 chunkPos = new Vector3(realX, 0, realZ);
+
+                Square chunkSquare = getChunkSquare(new Vector3(chunkPos.x, chunkPos.z));
+                Square viewSquare = getChunkSquare(new Vector3(viewPos.x, viewPos.z));
+
+                if (intersects(chunkSquare, viewSquare))
+                {
+                    ChunkVoxelData chunk;
+                    chunks.TryGetValue(chunkPos, out chunk);
+
+                    if (chunk == null)
+                    {
+                        for (int y = 0; y < worldDimensions.y; y++)
+                        {
+                            // chunkUpdateQueue.Add(MakeChunkAt(realX, y, realZ));
+                        }
+                        // UpdateNextChunk();
+
                     }
                 }
+
             }
         }
+
         while (functionsQueue.Count > 0)
         {
             Action func = functionsQueue[0];
@@ -107,15 +165,35 @@ public class TerrainGeneratorAsync : MonoBehaviour
         }
     }
 
+    private Square getChunkSquare(Vector3 pos)
+    {
+        Square square = new Square();
+        square.x = (int)pos.x;
+        square.y = (int)pos.z;
+        square.w = 1;
+
+        return square;
+    }
+
+    private bool intersects(Square a, Square b)
+    {
+        if (a.x >= b.x && a.x <= b.x + 1 && a.y >= b.y && a.y <= b.y + 1)
+        {
+            return true;
+        }
+        return false;
+    }
+
+
     public ChunkVoxelData MakeChunkAt(int x, int y, int z)
-    { 
-        GameObject chunk = Instantiate(chunkPrefab, 
+    {
+        GameObject chunk = Instantiate(chunkPrefab,
             new Vector3(
-                x * ChunkVoxelData.size + 0.5f, 
-                y * ChunkVoxelData.size + 0.5f, 
+                x * ChunkVoxelData.size + 0.5f,
+                y * ChunkVoxelData.size + 0.5f,
                 z * ChunkVoxelData.size + 0.5f
                 ), Quaternion.Euler(0, 0, 0), transform);
-        chunk.name = "chunk: (" + x + "." + y + "." + z+")";
+        chunk.name = "chunk: (" + x + "." + y + "." + z + ")";
         ChunkVoxelData data = chunk.GetComponent<ChunkVoxelData>();
         data.terrain = this;
         data.chunkPos = new Vector3(x, y, z);
@@ -128,15 +206,15 @@ public class TerrainGeneratorAsync : MonoBehaviour
 
     private void RegenerateSyncWrapper(ChunkVoxelData data)
     {
-        if (!data.isEmpty)
-        {
-            data.RegenerateSync(true);
-        }
-        else
+        if (data.isEmpty)
         {
             data.threadFinished = true;
         }
-      
+        else
+        {
+            data.RegenerateSync(true);
+        }
+
 
         Action toMainThread = () =>
         {
@@ -160,9 +238,17 @@ public class TerrainGeneratorAsync : MonoBehaviour
     {
         int size = ChunkVoxelData.size;
 
-        int chunkPosX = worldX / size;
-        int chunkPosY = worldY / size;
-        int chunkPosZ = worldZ / size;
+        int chunkPosX = Mathf.FloorToInt((float)worldX / size);
+        int chunkPosY = Mathf.FloorToInt((float)worldY / size);
+        int chunkPosZ = Mathf.FloorToInt((float)worldZ / size);
+
+        // if (c < 1)
+        // {
+        //     Debug.Log(new Vector3(worldX, worldY, worldZ));
+        //     Debug.Log(new Vector3(chunkPosX, chunkPosY, chunkPosZ));
+        //     c++;
+
+        // }
 
         ChunkVoxelData chunk = null;
         chunks.TryGetValue(new Vector3(chunkPosX, chunkPosY, chunkPosZ), out chunk);
@@ -177,20 +263,33 @@ public class TerrainGeneratorAsync : MonoBehaviour
         int chunkY = y % size;
         int chunkZ = z % size;
 
-        if(x < 0 || x >= worldDimensions.x * size)
-        {
-            return 0;
-        }
-        if (y < 0 || y >= worldDimensions.y * size)
-        {
-            return 0;
-        }
-        if (z < 0 || z >= worldDimensions.z * size)
-        {
-            return 0;
-        }
+        // Debug.Log(new Vector3(x, y, z));
+
+
 
         ChunkVoxelData chunk = GetChunk(x, y, z);
+        if (chunk == null)
+        {
+            // Debug.Log("Chunk doesn't exist at: " + new Vector3(x, y, z));
+            return 0;
+        }
+        else
+        {
+            // Debug.Log("Chunk exists at: " + new Vector3(x, y, z));
+        }
+
+        // if (x < 0 || x >= worldDimensions.x * size)
+        // {
+        //     return 0;
+        // }
+        // if (y < 0 || y >= worldDimensions.y * size)
+        // {
+        //     return 0;
+        // }
+        // if (z < 0 || z >= worldDimensions.z * size)
+        // {
+        //     return 0;
+        // }
 
         return chunk.GetCell(chunkX, chunkY, chunkZ);
     }
@@ -217,7 +316,6 @@ public class TerrainGeneratorAsync : MonoBehaviour
         {
             adjacentChunks[0] = GetChunk(x - 1, y, z);
             needsGlobalChange = true;
-
         }
 
         if (chunkY == size - 1)
@@ -276,7 +374,7 @@ public class TerrainGeneratorAsync : MonoBehaviour
         }
     }
 
-    
+
 
     int cubeTypes = 5;
 
@@ -288,7 +386,7 @@ public class TerrainGeneratorAsync : MonoBehaviour
 
         bool isEmpty = true;
 
-        if(chunkPosY * size > maxTerrainHeight)
+        if (chunkPosY * size > maxTerrainHeight)
         {
             data.SetRaw(raw, isEmpty);
             return raw;
@@ -302,7 +400,7 @@ public class TerrainGeneratorAsync : MonoBehaviour
                     chunkPosZ * size + z,
                     chunkPosX * size + x
                     );
-                int cubeType = 3;
+                int cubeType = 1;
 
                 if (yVal / size >= chunkPosY)
                 {
@@ -318,7 +416,8 @@ public class TerrainGeneratorAsync : MonoBehaviour
         data.SetRaw(raw, isEmpty);
         return raw;
     }
-    public void Async(Action<ChunkVoxelData> func, ChunkVoxelData data) {
+    public void Async(Action<ChunkVoxelData> func, ChunkVoxelData data)
+    {
         Thread thread = new Thread(() => func(data));
         thread.Start();
         threadFinished = false;
@@ -337,4 +436,12 @@ public class TerrainGeneratorAsync : MonoBehaviour
         return Mathf.FloorToInt(e * maxTerrainHeight);
     }
 
+}
+
+public struct Square
+{
+    public int x;
+    public int y;
+
+    public int w;
 }

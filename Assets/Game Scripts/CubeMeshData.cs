@@ -53,7 +53,7 @@ public static class CubeMeshData
     public static Vector3[] faceVertices(int dir, int x, int y, int z)
     {
         Vector3[] fv = new Vector3[4];
-        Vector3 pos = new Vector3(x,y,z);
+        Vector3 pos = new Vector3(x, y, z);
 
         for (int i = 0; i < 4; i++)
         {
@@ -76,10 +76,10 @@ public static class CubeMeshData
                 return new Vector2(position.x, position.z);
             case Direction.East:
             case Direction.West:
-                return new Vector2(position.z, position.y);
+                return new Vector2(position.z, position.y - 0.5f);
             case Direction.North:
             case Direction.South:
-                return new Vector2(position.x, position.y);
+                return new Vector2(position.x, position.y - 0.5f);
         }
 
         // Fallback for an invalid input direction.

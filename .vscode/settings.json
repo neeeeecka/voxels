@@ -52,5 +52,8 @@
         "temp/": true,
         "Temp/": true
     },
-    "editor.formatOnSaveTimeout": 550
+    "editor.formatOnSaveTimeout": 550,
+    "editor.formatOnPaste": true,
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "ms-dotnettools.csharp"
 }

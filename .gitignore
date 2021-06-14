@@ -57,6 +57,13 @@ sysinfo.txt
 
 *.meta
 
+*.jpg
+*.psd
+*.png
+*.tga
+
+assets/_generated/
+
 # Crashlytics generated file
 crashlytics-build.properties
 

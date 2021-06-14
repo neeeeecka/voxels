@@ -3,6 +3,8 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Threading;
 using UnityEngine;
+using UnityEngine.Rendering;
+using UnityEditor;
 
 public class ChunkVoxelData : MonoBehaviour
 {
@@ -24,6 +26,8 @@ public class ChunkVoxelData : MonoBehaviour
     public MeshFilter meshFilter;
     public MeshCollider meshCollider;
 
+    public MeshRenderer meshRenderer;
+
     public bool threadFinished = true;
     List<Action> functionsQueue = new List<Action>();
 
@@ -33,11 +37,32 @@ public class ChunkVoxelData : MonoBehaviour
     public bool ready = false;
     public bool isEmpty = true;
 
+    delegate int NeighborGetter(int x, int y, int z, Direction dir);
+
+    NeighborGetter globalNeighborGetter;
+    NeighborGetter localNeighborGetter;
+
+    ChunkVoxelData()
+    {
+        globalNeighborGetter = delegate (int x, int y, int z, Direction dir)
+            {
+                return GetGlobalNeighbor(x, y, z, dir);
+            };
+        localNeighborGetter = delegate (int x, int y, int z, Direction dir)
+            {
+                return GetLocalNeighbor(x, y, z, dir);
+            };
+
+    }
+
     void Start()
     {
+
+
         mesh = new Mesh();
         meshFilter = GetComponent<MeshFilter>();
         meshCollider = GetComponent<MeshCollider>();
+        meshRenderer = GetComponent<MeshRenderer>();
         meshFilter.mesh = mesh;
         mesh.MarkDynamic();
     }
@@ -63,9 +88,9 @@ public class ChunkVoxelData : MonoBehaviour
         //Debug.Log("Needs global change: " + needsGlobalChange);
         //Debug.Log("chunk " + chunkPos);
 
-            needsGlobalChange = true;
-            Async(ChunkUpdate, needsGlobalChange);
-            //ChunkUpdate(needsGlobalChange)
+        needsGlobalChange = true;
+        Async(ChunkUpdate, needsGlobalChange);
+        //ChunkUpdate(needsGlobalChange)
     }
     public void RegenerateSync(bool needsGlobalChange)
     {
@@ -87,9 +112,14 @@ public class ChunkVoxelData : MonoBehaviour
             mesh.normals = _normals;
             mesh.triangles = triArr;
             mesh.SetUVs(0, new List<Vector4>(_uvs));
+            mesh.RecalculateTangents();
 
+            meshRenderer.shadowCastingMode = ShadowCastingMode.On;
             meshCollider.sharedMesh = mesh;
             threadFinished = true;
+
+            // AssetDatabase.CreateAsset(mesh, "Assets/_Generated/" + "chunkie.asset");
+            // AssetDatabase.SaveAssets();
         };
 
         functionsQueue.Add(toMainThread);
@@ -119,30 +149,39 @@ public class ChunkVoxelData : MonoBehaviour
 
     void MakeCube(int x, int y, int z, int cubeType, bool needsGlobalChange)
     {
-        if (needsGlobalChange)
+        NeighborGetter neighborGetter = needsGlobalChange ? globalNeighborGetter : localNeighborGetter;
+
+        bool hasBlockUpwards = neighborGetter(x, y, z, Direction.Up) != 0;
+
+        for (int i = 0; i < 6; i++)
         {
-            for (int i = 0; i < 6; i++)
+            Direction dir = (Direction)i;
+            int textureType = 1;
+            //textureIndex = realIndex + 1 cause air = 0
+            // textureType = 8;
+            //TODO: Change for custom behaviour for each block
+            if (cubeType == 1)
             {
-                Direction dir = (Direction)i;
-                if (GetGlobalNeighbor(x, y, z, dir) == 0)
+                if (dir == Direction.Up)
                 {
-                    MakeFace(dir, x, y, z, cubeType);
+                    textureType = 5; //grass top
                 }
+                else if (!hasBlockUpwards)
+                {
+                    textureType = 9; //grass side
+                }
+
+                // textureType = 5;
+
             }
-        }
-        else
-        {
-            for (int i = 0; i < 6; i++)
+            if (neighborGetter(x, y, z, dir) == 0)
             {
-                Direction dir = (Direction)i;
-                if (GetNeighbor(x, y, z, dir) == 0)
-                {
-                    MakeFace(dir, x, y, z, cubeType);
-                }
+                MakeFace(dir, x, y, z, textureType);
             }
         }
 
     }
+    int verticesCounter = 0;
     void MakeFace(Direction dir, int x, int y, int z, int cubeType)
     {
         VertexSignature signature;
@@ -154,6 +193,9 @@ public class ChunkVoxelData : MonoBehaviour
 
         for (int i = 0; i < 4; i++)
         {
+            signature.index = verticesCounter;
+            verticesCounter++;
+
             signature.position = faceVertices[i];
 
             int vertex = GetVertexIndex(signature);
@@ -171,17 +213,10 @@ public class ChunkVoxelData : MonoBehaviour
             triangleIndices[3]
             }
         );
- 
+
     }
 
-    float VertexAO(int side1, int side2, float corner)
-    {
-        if (side1 == 1 && side2 == 1)
-        {
-            return 0;
-        }
-        return 3 - (side1 + side2 + corner);
-    }
+
 
     void PrepareMeshData()
     {
@@ -194,7 +229,9 @@ public class ChunkVoxelData : MonoBehaviour
             int index = pair.Value;
             CubeMeshData.DataCoordinate coord = CubeMeshData.offsets[(int)pair.Key.normal];
             Vector4 uv = CubeMeshData.ProjectPositionToUV(pair.Key.position, pair.Key.normal);
-            uv.z = pair.Key.cubeType;
+
+            uv.w = pair.Key.cubeType;
+            // uv.w = 9;
 
             _vertices[index] = pair.Key.position;
             _normals[index] = new Vector3(coord.x, coord.y, coord.z);
@@ -203,13 +240,15 @@ public class ChunkVoxelData : MonoBehaviour
             Vector3 chunkPos = pair.Key.position;
             Vector3 normal = CubeMeshData.offsets[(int)pair.Key.normal].ToVector();
 
-            int cx = Mathf.FloorToInt(chunkPos.x) + (int)normal.x;
-            int cy = Mathf.FloorToInt(chunkPos.y) + (int)normal.y;
-            int cz = Mathf.FloorToInt(chunkPos.z) + (int)normal.y;
+            _uvs[index] = uv;
 
-            int side1 = GetNeighbor(cx, cy, cz, Direction.East);
-            int side2 = GetNeighbor(cx, cy, cz, Direction.West);
-            int corner = GetNeighbor(cx, cy, cz, Direction.Down);
+            // int cx = Mathf.FloorToInt(chunkPos.x) + (int)normal.x;
+            // int cy = Mathf.FloorToInt(chunkPos.y) + (int)normal.y;
+            // int cz = Mathf.FloorToInt(chunkPos.z) + (int)normal.y;
+
+            // int side1 = GetNeighbor(cx, cy, cz, Direction.East);
+            // int side2 = GetNeighbor(cx, cy, cz, Direction.West);
+            // int corner = GetNeighbor(cx, cy, cz, Direction.Down);
 
             //int side3 = GetNeighbor(cx, cy, cz, Direction.North);
             //int side4 = GetNeighbor(cx, cy, cz, Direction.South);
@@ -219,18 +258,10 @@ public class ChunkVoxelData : MonoBehaviour
             //uv.w = (side1 + side2 + corner) + 1;
 
             //uv.w = VertexAO(side1, side2, corner);
-            uv.w = 1;
-            _uvs[index] = uv;
+            // uv.w = 1; 
         }
     }
-    public int VertexAO(int side1, int side2, int corner)
-    {
-        if (side1 != 0 && side2 != 0)
-        {
-            return 0;
-        }
-        return 3 - (side1 + side2 + corner);
-}
+
     public void Async(Action<bool> func, bool param)
     {
         //Thread thread = new Thread(new ThreadStart(func));
@@ -244,18 +275,31 @@ public class ChunkVoxelData : MonoBehaviour
         public Vector3 position;
         public Direction normal;
         public char cubeType;
+        public int index;
 
+        //Blocks will share vertices if faces have same normals and position 
+        // public override int GetHashCode()
+        // {
+        //     char x = (char)(position.x * 2);
+        //     char y = (char)(position.y * 2);
+        //     char z = (char)(position.z * 2);
+
+        //     char n = (char)normal;
+        //     char c = cubeType;
+
+        //     // int p = (((x + y * size * 2) * size * 2 + z) * 6 + n) * 4 + c;
+        //     int p = (((x + y * size * 2) * size * 2 + z) * 6 + n);
+        //     //ignore cube type, 
+        //     //treat as same block
+        //     //...cant UV map that thing
+
+        //     return p;
+        // }
+
+        //will use quads before I figure out how to do UV mapping for optimized meshes
         public override int GetHashCode()
         {
-            char x = (char)(position.x * 2);
-            char y = (char)(position.y * 2);
-            char z = (char)(position.z * 2);
-
-            char n = (char)normal;
-            char c = cubeType;
-
-            int p = (((x + y * size * 2) * size * 2 + z) * 6 + n) * 4 + c;
-            return p;
+            return index;
         }
         public override bool Equals(object obj)
         {
@@ -284,7 +328,7 @@ public class ChunkVoxelData : MonoBehaviour
     }
     public void SetCell(int x, int y, int z, int val)
     {
-        if(val != 0)
+        if (val != 0)
         {
             isEmpty = false;
         }
@@ -305,7 +349,7 @@ public class ChunkVoxelData : MonoBehaviour
 
         return terrain.GetBlockAt(neighborCoordinate.x, neighborCoordinate.y, neighborCoordinate.z);
     }
-    public int GetNeighbor(int x, int y, int z, Direction dir)
+    public int GetLocalNeighbor(int x, int y, int z, Direction dir)
     {
         CubeMeshData.DataCoordinate checkOffset = CubeMeshData.offsets[(int)dir];
         CubeMeshData.DataCoordinate neighborCoordinate = new CubeMeshData.DataCoordinate(
