@@ -21,11 +21,11 @@ Material:
     serializedVersion: 3
     m_TexEnvs:
     - Texture2DArray_12D7EE87:
-        m_Texture: {fileID: 18700000, guid: d1908447775df2e4496f5170dda79051, type: 2}
+        m_Texture: {fileID: 18700000, guid: cd4779829ffd5f44b8e664c6d12d5dd1, type: 2}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - Texture2DArray_58229789:
-        m_Texture: {fileID: 18700000, guid: 1cad8345b67a8bb42922d6a26dee32ab, type: 2}
+        m_Texture: {fileID: 18700000, guid: e1cb9e9fb29fdde4b973c656ae5b0185, type: 2}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - Texture2D_2DD6CFE8:
