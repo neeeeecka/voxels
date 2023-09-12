@@ -1,3 +1,5 @@
 3D Voxel terrain generator leveraging C# multithreading to generate world chunks in background:
 
-<iframe width="560" height="315" src="https://www.youtube.com/embed/lmGU3_SfWBQ?si=hFM8rO9D-x4W-7bD" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+<a href = "https://www.youtube.com/watch?v=lmGU3_SfWBQ">
+<img width="1500" alt="image" src="https://github.com/neeeeecka/minecraft/assets/22796372/f4cdcfcc-eb7c-4b05-b08b-1a40888dc8a7">
+</a>
